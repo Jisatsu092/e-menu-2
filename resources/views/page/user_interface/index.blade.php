@@ -1169,15 +1169,14 @@
                 if (!modal) return;
 
                 const statusElement = modal.querySelector('.status-text');
-                const printButton = document.getElementById('printButton');
+                const printBtn = document.getElementById('printButton');
 
-                if (statusElement && printButton) {
+                if (statusElement && printBtn) {
                     statusElement.textContent = status;
                     statusElement.className = `font-bold ${status === 'proses' ? 'text-green-500' : 'text-yellow-500'}`;
-                    printButton.style.display = status === 'proses' ? 'block' : 'none';
-                    printButton.dataset.transactionId = transactionId;
+                    printBtn.style.display = status === 'proses' ? 'block' : 'none';
+                    printBtn.dataset.transactionId = transactionId;
 
-                    // Tampilkan modal dengan menghapus kelas 'hidden'
                     modal.classList.remove('hidden');
                 }
             }
@@ -1187,7 +1186,7 @@
                 document.getElementById('mobileCartDropdown').classList.add('hidden');
             }
 
-            function checkPendingOrder() {
+            async function checkPendingOrder() {
                 try {
                     const pendingOrderStr = sessionStorage.getItem('pendingOrderStatus');
                     if (!pendingOrderStr) return;
@@ -1195,9 +1194,36 @@
                     const pendingOrder = JSON.parse(pendingOrderStr);
                     if (!pendingOrder || !pendingOrder.showModal) return;
 
-                    const oneHourAgo = Date.now() - 3600000; // 1 jam dalam milidetik
+                    const oneHourAgo = Date.now() - 3600000;
                     if (pendingOrder.timestamp > oneHourAgo) {
-                        showPersistedOrderModal(pendingOrder.status, pendingOrder.transactionId);
+                        try {
+                            // Cek status terbaru dari server
+                            const response = await fetch(`/transactions/${pendingOrder.transactionId}/status`);
+                            if (!response.ok) throw new Error('Failed to fetch status');
+
+                            const data = await response.json();
+                            const currentStatus = data.status.toLowerCase();
+
+                            // Update status di session storage
+                            const updatedOrder = {
+                                ...pendingOrder,
+                                status: currentStatus,
+                                timestamp: Date.now()
+                            };
+                            sessionStorage.setItem('pendingOrderStatus', JSON.stringify(updatedOrder));
+
+                            // Tampilkan modal dengan status terbaru
+                            showPersistedOrderModal(currentStatus, pendingOrder.transactionId);
+
+                            // Hapus jika status sudah final
+                            if (!['pending', 'proses'].includes(currentStatus)) {
+                                sessionStorage.removeItem('pendingOrderStatus');
+                            }
+                        } catch (error) {
+                            console.error('Gagal memperbarui status:', error);
+                            // Fallback ke status lokal jika gagal fetch
+                            showPersistedOrderModal(pendingOrder.status, pendingOrder.transactionId);
+                        }
                     } else {
                         sessionStorage.removeItem('pendingOrderStatus');
                     }

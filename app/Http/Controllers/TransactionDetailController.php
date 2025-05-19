@@ -84,7 +84,7 @@ class TransactionDetailController extends Controller
         return redirect()->back()->with('success', 'All transaction details cleared successfully.');
     }
 
-    public function report()
+    public function detailreport()
     {
         $transactions = TransactionDetail::with(['transaction', 'toping'])
             ->get()
@@ -92,4 +92,5 @@ class TransactionDetailController extends Controller
 
         return view('page.transaction_detail.report', compact('transactions'));
     }
+
 }

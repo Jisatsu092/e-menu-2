@@ -111,3 +111,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/user_interface', [userInterfaceController::class, 'index'])->name('userInterface.index');
     Route::post('/confirm-payment', [userInterfaceController::class, 'confirmPayment'])->name('payment.confirm');
 });
+
+// routes/web.php
+Route::get('/transactions/{transaction}/status', function (App\Models\Transaction $transaction) {
+    return response()->json([
+        'status' => $transaction->status,
+        'updated_at' => $transaction->updated_at
+    ]);
+})->middleware('auth');
