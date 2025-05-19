@@ -167,8 +167,9 @@
                 end: endDate
             });
 
-            window.open(`/transaction/print-all?${params.toString()}`, '_blank');
+            window.open(`/print/transactions/all?${params}`, '_blank');
         }
+        
 
         document.getElementById('search').addEventListener('input', function() {
             const search = this.value.toLowerCase();

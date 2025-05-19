@@ -93,8 +93,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/transaction/{transaction}/status', [TransactionController::class, 'updateStatus'])->name('transaction.status');
     Route::put('/transaction/{id}/process', [TransactionController::class, 'process'])->name('transaction.process');
     Route::get('/check-status/{transaction}', [TransactionController::class, 'checkStatus'])->name('transaction.checkStatus');
-    Route::get('/transaction/report', [TransactionController::class, 'report'])->name('transaction.report');
-    Route::get('/transaction/print-all', [TransactionController::class, 'printAll'])->name('transaction.print.all');
+    // Route::get('/transaction/report', [TransactionController::class, 'report'])->name('transaction.report');
+    Route::get('/print/transactions/all', [TransactionController::class, 'printAll'])
+    ->name('transaction.print.all');
     Route::get('/transaction/{id}/print', [TransactionController::class, 'print'])->name('transaction.print');
     Route::get('/transaksi/print/{transaction}', [TransactionController::class, 'print'])->name('transaksi.print');
     Route::post('/confirm-payment', [TransactionController::class, 'confirmPayment'])->name('confirm.payment');
@@ -111,6 +112,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/user_interface', [userInterfaceController::class, 'index'])->name('userInterface.index');
     Route::post('/confirm-payment', [userInterfaceController::class, 'confirmPayment'])->name('payment.confirm');
 });
+
+Route::prefix('reports')->group(function () {
+    Route::get('/transactions', [TransactionController::class, 'report'])->name('transaction.report');
+});
+
+
 
 // routes/web.php
 Route::get('/transactions/{transaction}/status', function (App\Models\Transaction $transaction) {

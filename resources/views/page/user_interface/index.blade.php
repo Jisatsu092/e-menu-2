@@ -829,7 +829,7 @@
                 }
             }
 
-            // Fungsi Modal
+            // Panggil saat modal dibuka
             function openCheckoutModal() {
                 showModal('checkoutModal');
                 if (cart.length === 0) {
@@ -838,20 +838,33 @@
                 }
 
                 document.getElementById('orderItems').innerHTML = cart.map(item => `
-                    <div class="flex justify-between">
-                        <span>${item.name} (Qty: ${item.quantity})</span>
-                        <span>Rp${(item.price * item.quantity).toLocaleString('id-ID')}</span>
-                    </div>
-                `).join('');
+        <div class="flex justify-between">
+            <span>${item.name} (Qty: ${item.quantity})</span>
+            <span>Rp${(item.price * item.quantity).toLocaleString('id-ID')}</span>
+        </div>
+    `).join('');
 
                 const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
                 document.getElementById('modalTotal').textContent = `Rp${total.toLocaleString('id-ID')}`;
                 document.getElementById('cartDropdown').classList.add('hidden');
-                document.getElementById('mobileCartPanel').classList.add('hidden');
+                document.getElementById('mobileCartPanel')?.classList.add('hidden');
                 document.getElementById('checkoutModal').classList.remove('hidden');
                 document.getElementById('mobileCartDropdown').classList.add('hidden');
 
                 refreshTableStatus();
+                // Mulai interval
+                refreshInterval = setInterval(() => {
+                    if (!document.getElementById('checkoutModal').classList.contains('hidden')) {
+                        refreshTableStatus();
+                    } else {
+                        clearInterval(refreshInterval); // Hentikan interval saat modal ditutup
+                    }
+                }, 5000);
+            }
+
+            function closeCheckoutModal() {
+                document.getElementById('checkoutModal').classList.add('hidden');
+                clearInterval(refreshInterval); // Hentikan interval
             }
 
             function closeCheckoutModal() {
@@ -1047,6 +1060,8 @@
                 }
             }
 
+            let refreshInterval;
+
             async function refreshTableStatus() {
                 try {
                     const response = await fetch('/tables');
@@ -1062,23 +1077,16 @@
                             table.id
                         );
                         option.dataset.status = table.status;
-                        option.disabled = table.status === 'occupied';
+                        option.disabled = table.status.toLowerCase() === 'occupied'; // Normalkan case
                         select.appendChild(option);
                     });
 
                     select.value = currentValue;
 
-                    // Force re-check status jika nilai masih ada
                     if (currentValue) checkTableStatus(currentValue);
                 } catch (error) {
                     console.error('Gagal memperbarui status meja:', error);
                 }
-
-                setInterval(() => {
-                    if (!document.getElementById('checkoutModal').classList.contains('hidden')) {
-                        refreshTableStatus();
-                    }
-                }, 5000);
             }
 
             // Perbaikan fungsi showOrderModal
