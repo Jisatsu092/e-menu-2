@@ -29,6 +29,7 @@ return array(
     'App\\Http\\Controllers\\TransactionDetailController' => $baseDir . '/app/Http/Controllers/TransactionDetailController.php',
     'App\\Http\\Controllers\\TransactionTopingController' => $baseDir . '/app/Http/Controllers/TransactionTopingController.php',
     'App\\Http\\Controllers\\userInterfaceController' => $baseDir . '/app/Http/Controllers/userInterfaceController.php',
+    'App\\Http\\Middleware\\RoleMiddelware' => $baseDir . '/app/Http/Middleware/RoleMiddelware.php',
     'App\\Http\\Requests\\Auth\\LoginRequest' => $baseDir . '/app/Http/Requests/Auth/LoginRequest.php',
     'App\\Http\\Requests\\ProfileUpdateRequest' => $baseDir . '/app/Http/Requests/ProfileUpdateRequest.php',
     'App\\Models\\Category' => $baseDir . '/app/Models/Category.php',

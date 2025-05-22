@@ -347,8 +347,8 @@ class ComposerStaticInit640b6a41b777ff8e4a08e41eb88cb5f2
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
-            1 => __DIR__ . '/..' . '/psr/http-factory/src',
+            0 => __DIR__ . '/..' . '/psr/http-factory/src',
+            1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -388,8 +388,8 @@ class ComposerStaticInit640b6a41b777ff8e4a08e41eb88cb5f2
         ),
         'League\\Uri\\' => 
         array (
-            0 => __DIR__ . '/..' . '/league/uri-interfaces',
-            1 => __DIR__ . '/..' . '/league/uri',
+            0 => __DIR__ . '/..' . '/league/uri',
+            1 => __DIR__ . '/..' . '/league/uri-interfaces',
         ),
         'League\\MimeTypeDetection\\' => 
         array (
@@ -574,6 +574,7 @@ class ComposerStaticInit640b6a41b777ff8e4a08e41eb88cb5f2
         'App\\Http\\Controllers\\TransactionDetailController' => __DIR__ . '/../..' . '/app/Http/Controllers/TransactionDetailController.php',
         'App\\Http\\Controllers\\TransactionTopingController' => __DIR__ . '/../..' . '/app/Http/Controllers/TransactionTopingController.php',
         'App\\Http\\Controllers\\userInterfaceController' => __DIR__ . '/../..' . '/app/Http/Controllers/userInterfaceController.php',
+        'App\\Http\\Middleware\\RoleMiddelware' => __DIR__ . '/../..' . '/app/Http/Middleware/RoleMiddelware.php',
         'App\\Http\\Requests\\Auth\\LoginRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Auth/LoginRequest.php',
         'App\\Http\\Requests\\ProfileUpdateRequest' => __DIR__ . '/../..' . '/app/Http/Requests/ProfileUpdateRequest.php',
         'App\\Models\\Category' => __DIR__ . '/../..' . '/app/Models/Category.php',

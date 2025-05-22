@@ -741,25 +741,28 @@
                 if (itemIndex > -1) {
                     const newQty = cart[itemIndex].quantity + change;
 
-                    // Pastikan qty tidak bisa negatif
+                    // Tidak boleh kurang dari 0
                     if (newQty < 0) return;
 
+                    // Jika menambah item (change > 0), periksa stok
+                    if (change > 0 && currentStock < change) {
+                        Swal.fire('Stok tidak cukup!', `Stok tersisa hanya ${currentStock} item`, 'warning');
+                        return;
+                    }
+
                     if (newQty === 0) {
-                        // Hapus item jika quantity mencapai 0
+                        // Hapus item dari keranjang jika kuantitas menjadi 0
                         stockElement.textContent = currentStock + cart[itemIndex].quantity;
                         cart.splice(itemIndex, 1);
-                        document.getElementById(`qty-${id}`).textContent = 0; // Pastikan indikator 0
+                        document.getElementById(`qty-${id}`).textContent = 0;
                     } else {
-                        if (newQty > currentStock) {
-                            Swal.fire('Stok tidak cukup!', '', 'warning');
-                            return;
-                        }
+                        // Perbarui kuantitas dan stok
                         cart[itemIndex].quantity = newQty;
                         stockElement.textContent = currentStock - change;
-                        const qtyDisplay = document.getElementById(`qty-${id}`);
-                        if (qtyDisplay) qtyDisplay.textContent = newQty;
+                        document.getElementById(`qty-${id}`).textContent = newQty;
                     }
                 } else if (change === 1) {
+                    // Jika item belum ada di keranjang dan ingin ditambah
                     if (currentStock < 1) {
                         Swal.fire('Stok habis!', '', 'warning');
                         return;
@@ -772,8 +775,7 @@
                         quantity: 1
                     });
                     stockElement.textContent = currentStock - 1;
-                    const qtyDisplay = document.getElementById(`qty-${id}`);
-                    if (qtyDisplay) qtyDisplay.textContent = 1;
+                    document.getElementById(`qty-${id}`).textContent = 1;
                 }
 
                 updateCartDisplay();
