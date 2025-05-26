@@ -165,7 +165,7 @@
         <div class="payment-proof">
             <div class="divider"></div>
             <p style="text-align: center; margin: 2mm 0;">BUKTI PEMBAYARAN</p>
-            <img src="{{ asset('storage/' . $transaction->payment_proof) }}" 
+            <img src="{{ asset($transaction->payment_proof) }}" 
             alt="Bukti Bayar"
             style="max-width: 100%; height: auto; max-height: 40mm;">
         </div>

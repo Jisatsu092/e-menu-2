@@ -187,7 +187,7 @@ class TransactionController extends Controller
     public function destroy($id)
     {
         DB::beginTransaction();
-        try {
+        try { 
             $transaction = Transaction::findOrFail($id);
 
             // Hapus file payment proof

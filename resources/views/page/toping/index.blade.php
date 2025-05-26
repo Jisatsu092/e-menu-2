@@ -56,7 +56,7 @@
                                         <td class="px-4 py-2 md:px-6 md:py-4">{{ $toping->stock }}</td>
                                         <td class="px-4 py-2 md:px-6 md:py-4">
                                             @if ($toping->image)
-                                                <img src="{{ asset('storage/' . $toping->image) }}"
+                                                <img src="{{ asset($toping->image) }}"
                                                     class="w-16 h-16 object-cover rounded-lg shadow"
                                                     alt="Gambar Toping">
                                             @else
@@ -330,7 +330,7 @@
 
             // Set gambar saat ini
             if (button.dataset.image) {
-                currentImage.src = "{{ asset('storage') }}/" + button.dataset.image;
+                currentImage.src = "{{ asset('toping_images') }}/" + button.dataset.image;
             } else {
                 currentImage.src =
                     'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23CBD5E0"><path d="M4 5h16v12H4z"/><path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/></svg>';

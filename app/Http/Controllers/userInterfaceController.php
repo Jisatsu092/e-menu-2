@@ -117,8 +117,23 @@ class userInterfaceController extends Controller
 
             // Handle payment proof
             if ($request->hasFile('payment_proof')) {
-                $path = $request->file('payment_proof')->store('payment_proofs', 'public');
-                $transaction->update(['payment_proof' => $path]);
+                // Pastikan direktori payment_proofs ada
+                if (!file_exists(public_path('payment_proofs'))) {
+                    mkdir(public_path('payment_proofs'), 0755, true);
+                }
+    
+                // Hapus payment proof lama jika ada
+                if ($transaction->payment_proof && file_exists(public_path($transaction->payment_proof))) {
+                    unlink(public_path($transaction->payment_proof));
+                }
+    
+                // Simpan payment proof baru
+                $proof = $request->file('payment_proof');
+                $proofName = time() . '_' . $proof->getClientOriginalName();
+                $proofPath = 'payment_proofs/' . $proofName;
+                $proof->move(public_path('payment_proofs'), $proofName);
+    
+                $transaction->update(['payment_proof' => $proofPath]);
             }
 
             DB::commit();

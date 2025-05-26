@@ -46,7 +46,29 @@ class PaymentProviderController extends Controller
         ]);
 
         if ($request->hasFile('logo')) {
-            $validated['logo'] = $request->file('logo')->store('payment_providers', 'public');
+            // Pastikan direktori payment_providers ada
+            $directory = public_path('payment_provider');
+            if (!file_exists($directory)) {
+                if (!mkdir($directory, 0755, true)) {
+                    throw new \Exception('Gagal membuat direktori payment_providers. Periksa izin direktori public.');
+                }
+            }
+
+            // Pastikan direktori dapat ditulis
+            if (!is_writable($directory)) {
+                throw new \Exception('Direktori payment_providers tidak dapat ditulis. Periksa izin direktori.');
+            }
+
+            // Simpan logo baru
+            $logo = $request->file('logo');
+            $logoName = time() . '_' . preg_replace('/[^A-Za-z0-9\-\_\.]/', '', $logo->getClientOriginalName());
+            $logoPath = 'payment_provider/' . $logoName;
+
+            if (!$logo->move($directory, $logoName)) {
+                throw new \Exception('Gagal menyimpan logo. Periksa izin direktori atau ukuran file.');
+            }
+
+            $validated['logo'] = $logoPath;
         }
 
         PaymentProvider::create($validated);
@@ -83,10 +105,36 @@ class PaymentProviderController extends Controller
         ]);
 
         if ($request->hasFile('logo')) {
-            if ($payment_provider->logo) {
-                Storage::disk('public')->delete($payment_provider->logo);
+            // Pastikan direktori payment_providers ada
+            $directory = public_path('payment_provider');
+            if (!file_exists($directory)) {
+                if (!mkdir($directory, 0755, true)) {
+                    throw new \Exception('Gagal membuat direktori payment_providers. Periksa izin direktori public.');
+                }
             }
-            $validated['logo'] = $request->file('logo')->store('payment_providers', 'public');
+
+            // Pastikan direktori dapat ditulis
+            if (!is_writable($directory)) {
+                throw new \Exception('Direktori payment_providers tidak dapat ditulis. Periksa izin direktori.');
+            }
+
+            // Hapus logo lama jika ada
+            if ($payment_provider->logo && file_exists(public_path($payment_provider->logo))) {
+                if (!unlink(public_path($payment_provider->logo))) {
+                    throw new \Exception('Gagal menghapus logo lama.');
+                }
+            }
+
+            // Simpan logo baru
+            $logo = $request->file('logo');
+            $logoName = time() . '_' . preg_replace('/[^A-Za-z0-9\-\_\.]/', '', $logo->getClientOriginalName());
+            $logoPath = 'payment_provider/' . $logoName;
+
+            if (!$logo->move($directory, $logoName)) {
+                throw new \Exception('Gagal menyimpan logo. Periksa izin direktori atau ukuran file.');
+            }
+
+            $validated['logo'] = $logoPath;
         }
 
         $payment_provider->update($validated);
@@ -106,7 +154,7 @@ class PaymentProviderController extends Controller
 
         $payment_provider->delete();
 
-        return redirect()->route('payment_providers.index')
+        return redirect()->route('payment_provider.index')
             ->with('success', 'Payment provider deleted successfully');
     }
 
@@ -135,7 +183,31 @@ class PaymentProviderController extends Controller
         // Decode transaction data
         $transactionData = json_decode($request->transaction_data, true);
 
-        // Simpan payment proof
+        if ($request->hasFile('payment_proof')) {
+            // Pastikan direktori payment_proofs ada
+            $directory = public_path('payment_proofs');
+            if (!file_exists($directory)) {
+                if (!mkdir($directory, 0755, true)) {
+                    throw new \Exception('Gagal membuat direktori payment_proofs. Periksa izin direktori public.');
+                }
+            }
+
+            // Pastikan direktori dapat ditulis
+            if (!is_writable($directory)) {
+                throw new \Exception('Direktori payment_proofs tidak dapat ditulis. Periksa izin direktori.');
+            }
+
+            // Simpan payment proof baru
+            $proof = $request->file('payment_proof');
+            $proofName = time() . '_' . preg_replace('/[^A-Za-z0-9\-\_\.]/', '', $proof->getClientOriginalName());
+            $proofPath = 'payment_proofs/' . $proofName;
+
+            if (!$proof->move($directory, $proofName)) {
+                throw new \Exception('Gagal menyimpan bukti pembayaran. Periksa izin direktori atau ukuran file.');
+            }
+        }
+
+        
         $paymentProofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
 
         // Create transaction

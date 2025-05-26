@@ -37,7 +37,7 @@
                                     <td class="px-6 py-4 font-bold text-blue-600">
                                         <div class="flex items-center gap-2">
                                             @if($provider->logo)
-                                            <img src="{{ asset('storage/'.$provider->logo) }}" class="w-8 h-8 rounded-full">
+                                            <img src="{{ asset($provider->logo) }}" class="w-8 h-8 rounded-full">
                                             @endif
                                             {{ $provider->name }}
                                         </div>

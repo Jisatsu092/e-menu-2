@@ -591,7 +591,7 @@
                         data-category-id="{{ $toping->category_id }}">
                         <div class="relative h-28 md:h-36 rounded-lg overflow-hidden mb-2">
                             @if ($toping->image)
-                                <img src="{{ asset('storage/' . $toping->image) }}" alt="{{ $toping->name }}"
+                                <img src="{{ asset($toping->image) }}" alt="{{ $toping->name }}"
                                     class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full bg-gray-200 animate-pulse"></div>
@@ -700,26 +700,26 @@
                     </div>
                     <div class="space-y-3">
                         ${cart[currentPersonIndex].items.length > 0 ? cart[currentPersonIndex].items.map(item => `
-                                                            <div class="flex justify-between items-start bg-gray-50 rounded-lg p-3">
-                                                                <div class="flex-1">
-                                                                    <p class="font-medium text-sm">${item.name}</p>
-                                                                    <div class="flex items-center space-x-2 mt-1">
-                                                                        <button onclick="updateQuantity('${item.id}', -1, ${item.price})" 
-                                                                            class="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg text-xs">−</button>
-                                                                        <span class="text-sm font-medium">${item.quantity}</span>
-                                                                        <button onclick="updateQuantity('${item.id}', 1, ${item.price})" 
-                                                                            class="bg-red-500 text-white px-2 py-1 rounded-lg text-xs">+</button>
+                                                                    <div class="flex justify-between items-start bg-gray-50 rounded-lg p-3">
+                                                                        <div class="flex-1">
+                                                                            <p class="font-medium text-sm">${item.name}</p>
+                                                                            <div class="flex items-center space-x-2 mt-1">
+                                                                                <button onclick="updateQuantity('${item.id}', -1, ${item.price})" 
+                                                                                    class="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg text-xs">−</button>
+                                                                                <span class="text-sm font-medium">${item.quantity}</span>
+                                                                                <button onclick="updateQuantity('${item.id}', 1, ${item.price})" 
+                                                                                    class="bg-red-500 text-white px-2 py-1 rounded-lg text-xs">+</button>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="text-right">
+                                                                            <p class="text-sm font-medium text-red-500">
+                                                                                Rp${(item.price * item.quantity).toLocaleString('id-ID')}
+                                                                            </p>
+                                                                            <button onclick="removeItem('${item.id}')" 
+                                                                                class="text-gray-400 hover:text-red-500 text-xs mt-1">Hapus</button>
+                                                                        </div>
                                                                     </div>
-                                                                </div>
-                                                                <div class="text-right">
-                                                                    <p class="text-sm font-medium text-red-500">
-                                                                        Rp${(item.price * item.quantity).toLocaleString('id-ID')}
-                                                                    </p>
-                                                                    <button onclick="removeItem('${item.id}')" 
-                                                                        class="text-gray-400 hover:text-red-500 text-xs mt-1">Hapus</button>
-                                                                </div>
-                                                            </div>
-                                                        `).join('') : '<p class="text-sm text-gray-500">Belum ada item</p>'}
+                                                                `).join('') : '<p class="text-sm text-gray-500">Belum ada item</p>'}
                     </div>
                 `;
 
@@ -1009,8 +1009,7 @@
 
                 if (provider) {
                     paymentDetails.classList.remove('hidden');
-                    document.getElementById('providerLogo').src = provider.logo ?
-                        "{{ asset('storage/') }}/" + provider.logo : '';
+                    document.getElementById('providerLogo').src = provider.logo;
                     document.getElementById('providerName').textContent = provider.name;
                     document.getElementById('providerType').textContent = provider.type;
                     document.getElementById('accountNumber').textContent = provider.account_number;

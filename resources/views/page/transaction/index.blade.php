@@ -51,7 +51,7 @@
                                         <td class="px-6 py-4">
                                             @if ($transaction->paymentProvider)
                                                 <div class="flex items-center gap-2">
-                                                    <img src="{{ asset('storage/' . $transaction->paymentProvider->logo) }}"
+                                                    <img src="{{ asset($transaction->paymentProvider->logo) }}"
                                                         class="w-8 h-8 object-contain rounded-lg">
                                                     <span>{{ $transaction->paymentProvider->name }}</span>
                                                 </div>
@@ -61,9 +61,9 @@
                                         </td>
                                         <td class="px-6 py-4">
                                             @if ($transaction->payment_proof)
-                                                <button onclick="showImageModal('{{ asset('storage/' . $transaction->payment_proof) }}')"
+                                                <button onclick="showImageModal('{{ asset( $transaction->payment_proof) }}')"
                                                     class="inline-block group relative">
-                                                    <img src="{{ asset('storage/' . $transaction->payment_proof) }}"
+                                                    <img src="{{ asset($transaction->payment_proof) }}"
                                                         class="w-16 h-16 object-cover rounded-lg border-2 border-blue-200 transition-transform group-hover:scale-110"
                                                         alt="Bukti pembayaran transaksi {{ $transaction->id }}">
                                                     <span

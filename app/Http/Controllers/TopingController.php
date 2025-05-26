@@ -54,7 +54,7 @@ class TopingController extends Controller
      */
     public function store(Request $request)
     {
-        try {
+        // try {
             $request->validate([
                 'name' => 'required|unique:topings|max:255',
                 'category_id' => 'required|exists:categories,id',
@@ -62,30 +62,52 @@ class TopingController extends Controller
                 'stock' => 'required|integer|min:0',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
             ]);
-
+    
             $data = [
                 'name' => $request->input('name'),
                 'category_id' => $request->input('category_id'),
                 'price' => $request->input('price'),
-                'price_buy' => $this->calculatePriceBuy($request->input('price')), // Hitung price_buy
+                'price_buy' => $this->calculatePriceBuy($request->input('price')),
                 'stock' => $request->input('stock'),
             ];
-
+    
             if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('toping_images', 'public');
+                // Pastikan direktori toping_images ada
+                $directory = public_path('toping_images');
+                if (!file_exists($directory)) {
+                    if (!mkdir($directory, 0755, true)) {
+                        throw new \Exception('Gagal membuat direktori toping_images. Periksa izin direktori public.');
+                    }
+                }
+    
+                // Pastikan direktori dapat ditulis
+                if (!is_writable($directory)) {
+                    throw new \Exception('Direktori toping_images tidak dapat ditulis. Periksa izin direktori.');
+                }
+    
+                // Simpan gambar baru
+                $image = $request->file('image');
+                $imageName = time() . '_' . preg_replace('/[^A-Za-z0-9\-\_\.]/', '', $image->getClientOriginalName());
+                $imagePath = 'toping_images/' . $imageName;
+    
+                // Pindahkan file dan periksa keberhasilan
+                if (!$image->move($directory, $imageName)) {
+                    throw new \Exception('Gagal menyimpan gambar. Periksa izin direktori atau ukuran file.');
+                }
+    
                 $data['image'] = $imagePath;
             }
-
+    
             Toping::create($data);
-
+    
             return redirect()
                 ->route('toping.index')
                 ->with('success', 'Data topping berhasil ditambahkan.');
-        } catch (\Exception $e) {
-            return redirect()
-                ->route('error.index')
-                ->with('error_message', 'Terjadi kesalahan saat menambahkan data topping: ' . $e->getMessage());
-        }
+        // } catch (\Exception $e) {
+        //     return redirect()
+        //         ->route('error.index')
+        //         ->with('error_message', 'Terjadi kesalahan saat menambahkan data topping: ' . $e->getMessage());
+        // }
     }
 
     /**
@@ -113,13 +135,19 @@ class TopingController extends Controller
             $toping = Toping::findOrFail($id);
 
             if ($request->hasFile('image')) {
-                if ($toping->image) {
-                    Storage::disk('public')->delete($toping->image);
+                // Hapus gambar lama jika ada
+                if ($toping->image && file_exists(public_path($toping->image))) {
+                    unlink(public_path($toping->image));
                 }
-                $imagePath = $request->file('image')->store('toping_images', 'public');
+
+                // Simpan gambar baru
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $imagePath = 'toping_images/' . $imageName;
+                $image->move(public_path('toping_images'), $imageName);
+
                 $data['image'] = $imagePath;
             }
-
             $toping->update($data);
 
             return redirect()
