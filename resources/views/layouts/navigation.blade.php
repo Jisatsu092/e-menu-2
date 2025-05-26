@@ -55,13 +55,13 @@
                     <div class="relative" x-data="{ userInterfaceOpen: false }" @click.outside="userInterfaceOpen = false">
                         <button @click="userInterfaceOpen = !userInterfaceOpen" 
                                 class="flex items-center px-4 py-2 rounded-md text-gray-600 hover:bg-red-50 transition">
-                            User Interface
+                            Tampilan Toping
                             <svg class="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/>
                             </svg>
                         </button>
                         <div x-show="userInterfaceOpen" x-transition class="absolute mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-100 z-[1000]">
-                            <a href="{{ route('userInterface.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-red-100 transition">Kelola User</a>
+                            <a href="{{ route('userInterface.index') }}" class="block px-4 py-2 text-gray-700 hover:bg-red-100 transition">Toping</a>
                         </div>
                     </div>
                     @endcan
