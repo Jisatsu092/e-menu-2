@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('number')->unique();
             $table->enum('status', ['available', 'occupied'])->default('available');
+            $table->timestamp('occupied_at')->nullable();
             $table->timestamps();
         });
     }

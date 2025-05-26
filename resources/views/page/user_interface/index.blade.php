@@ -10,10 +10,25 @@
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
         <style>
-            /* Tambahkan di bagian style */
+            /* Style untuk dropdown */
+            details summary {
+                padding: 0.5rem;
+                background-color: #f9fafb;
+                border-radius: 0.5rem;
+                cursor: pointer;
+            }
+
+            details[open] summary {
+                background-color: #e5e7eb;
+            }
+
+            details div {
+                padding: 0.5rem;
+            }
+
+            /* Style tambahan untuk modal dan elemen lain */
             #orderConfirmationModal {
                 z-index: 1002;
-                /* Lebih tinggi dari floating cart */
             }
 
             @media (max-width: 768px) {
@@ -55,10 +70,8 @@
                 z-index: 50;
             }
 
-
             @media (max-width: 768px) {
                 .mobile-cart-panel {
-                    /* Lebar dinamis sesuai konten, dengan padding */
                     width: 90vw !important;
                     left: 5vw !important;
                     right: 5vw !important;
@@ -67,12 +80,10 @@
                     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
                 }
 
-                /* Scroll vertikal jika konten terlalu panjang */
                 .mobile-cart-panel .overflow-y-auto {
                     max-height: 65vh;
                 }
 
-                /* Tombol Checkout di mobile */
                 .mobile-cart-panel button[type="button"] {
                     width: 100%;
                     font-size: 0.9rem;
@@ -181,27 +192,40 @@
             }
 
             .cart-badge {
-                @extend .absolute;
-                -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs;
+                top: -2px;
+                right: -2px;
+                background-color: #dc2626;
+                color: white;
+                border-radius: 9999px;
+                width: 1.5rem;
+                height: 1.5rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.75rem;
             }
 
             .cart-item-details {
-                @extend .flex;
-                justify-between items-center mb-3;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.75rem;
             }
 
             .cart-item-card {
-                @apply flex-shrink-0 min-w-[120px] max-w-xs;
+                flex-shrink: 0;
+                min-width: 120px;
+                max-width: 20rem;
             }
 
             .cart-item-qty {
-                @extend .text-xs;
-                text-gray-500;
+                font-size: 0.75rem;
+                color: #6b7280;
             }
 
             .cart-item-price {
-                @extend .font-bold;
-                text-red-500;
+                font-weight: bold;
+                color: #ef4444;
             }
 
             #imageModal {
@@ -219,7 +243,6 @@
                 margin: 0 auto;
             }
 
-            /* Untuk tampilan desktop */
             @media (min-width: 768px) {
                 #imagePreview {
                     max-height: 300px;
@@ -235,9 +258,17 @@
     <body class="bg-gray-100">
         <div id="checkoutModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
             <div class="bg-white rounded-lg p-6 w-full max-w-md animate-bounce-in mx-4">
-                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <div class="flex justify-between items-center mb-4 border-b pb-2 relative">
                     <h3 class="text-xl font-bold text-red-500">Konfirmasi Pesanan</h3>
-                    <button onclick="closeCheckoutModal()" class="text-gray-500 hover:text-gray-700">×</button>
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-gray-500 hover:text-gray-700 cursor-pointer" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+                            onclick="showTableInfoAlert()" aria-label="Informasi tentang status meja">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <button onclick="closeCheckoutModal()" class="text-gray-500 hover:text-gray-700">×</button>
+                    </div>
                 </div>
                 <form id="checkoutForm" onsubmit="processPayment(event)">
                     @csrf
@@ -252,6 +283,7 @@
                             <select id="tableNumber" required class="mt-1 block w-full rounded-md border p-2"
                                 onchange="checkTableStatus(this.value)">
                                 <option value="">Pilih Meja</option>
+                                <option value="takeaway">Take Away</option>
                                 @foreach ($tables as $table)
                                     <option value="{{ $table->id }}" data-status="{{ $table->status }}"
                                         {{ $table->status === 'occupied' ? 'disabled' : '' }}>
@@ -441,6 +473,7 @@
                     <div class="flex justify-between items-center mb-4 pb-2 border-b">
                         <h3 class="text-lg font-bold">Keranjang Belanja</h3>
                         <div class="flex items-center space-x-4">
+                            <button onclick="addNewPerson()" class="text-blue-500 text-sm">Tambah Menu</button>
                             <button onclick="clearCart()" class="text-red-500 text-sm">Hapus Semua</button>
                             <button onclick="toggleMobileCart()" class="text-gray-500 hover:text-gray-700">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -450,9 +483,7 @@
                             </button>
                         </div>
                     </div>
-
                     <div id="mobileCartItems" class="flex-1 overflow-y-auto space-y-3 mb-4"></div>
-
                     <div class="pt-4 border-t">
                         <div class="flex justify-between mb-3">
                             <span class="font-medium">Total Item:</span>
@@ -492,7 +523,11 @@
                         <div class="p-4">
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-lg font-bold">Keranjang</h3>
-                                <button onclick="clearCart()" class="text-red-500 text-sm">Hapus Semua</button>
+                                <div class="flex items-center space-x-4">
+                                    <button onclick="addNewPerson()" class="text-blue-500 text-sm">Tambah
+                                        Menu</button>
+                                    <button onclick="clearCart()" class="text-red-500 text-sm">Hapus Semua</button>
+                                </div>
                             </div>
                             <div id="cartItems" class="space-y-3 max-h-60 overflow-y-auto"></div>
                             <div class="mt-4 pt-4 border-t">
@@ -624,56 +659,102 @@
                 sessionStorage.removeItem('pendingOrderStatus');
             }
 
-            let cart = [];
+            let cart = [{
+                person: "Orang 1",
+                items: []
+            }];
             let cartVisible = false;
+            let currentPersonIndex = 0;
             const paymentProviders = @json($paymentProviders->where('is_active', true));
 
             // Fungsi Keranjang
             function updateCartDisplay() {
-                const totalQty = cart.reduce((acc, item) => acc + item.quantity, 0);
-                const totalPrice = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+                const totalQty = cart.reduce((acc, person) => acc + person.items.reduce((sum, item) => sum + item.quantity, 0),
+                    0);
+                const totalPrice = cart.reduce((acc, person) => acc + person.items.reduce((sum, item) => sum + (item.price *
+                    item.quantity), 0), 0);
 
-                // Update Desktop
+                // Update badge dan total
                 document.getElementById('cartBadge').textContent = totalQty;
                 document.getElementById('cartTotal').textContent = `Rp${totalPrice.toLocaleString('id-ID')}`;
                 document.getElementById('cartItemTotal').textContent = `${totalQty} item`;
-
-                // Update Mobile
                 document.getElementById('mobileCartBadge').textContent = totalQty;
                 document.getElementById('mobileCartTotal').textContent = `Rp${totalPrice.toLocaleString('id-ID')}`;
                 document.getElementById('mobileCartItemTotal').textContent = `${totalQty} item`;
 
-                // Update Items
                 const mobileItems = document.getElementById('mobileCartItems');
                 const desktopItems = document.getElementById('cartItems');
 
-                mobileItems.innerHTML = cart.map(item => `
-                    <div class="flex justify-between items-start bg-gray-50 rounded-lg p-3">
-                        <div class="flex-1">
-                            <p class="font-medium text-sm">${item.name}</p>
-                            <div class="flex items-center space-x-2 mt-1">
-                                <button onclick="updateQuantity('${item.id}', -1, ${item.price})" 
-                                    class="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg text-xs">
-                                    −
-                                </button>
-                                <span class="text-sm font-medium">${item.quantity}</span>
-                                <button onclick="updateQuantity('${item.id}', 1, ${item.price})" 
-                                    class="bg-red-500 text-white px-2 py-1 rounded-lg text-xs">
-                                    +
-                                </button>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm font-medium text-red-500">
-                                Rp${(item.price * item.quantity).toLocaleString('id-ID')}
-                            </p>
-                            <button onclick="removeItem('${item.id}')" 
-                                class="text-gray-400 hover:text-red-500 text-xs mt-1">
-                                Hapus
-                            </button>
-                        </div>
-                    </div>
+                // Buat tombol untuk memilih orang
+                const personButtons = cart.map((person, index) => `
+                    <button onclick="selectPerson(${index})" 
+                        class="px-4 py-2 ${currentPersonIndex === index ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600'} rounded-md mr-2">
+                        ${person.person}
+                    </button>
                 `).join('');
+
+                // Tampilkan item untuk orang yang sedang aktif
+                const cartHTML = `
+                    <div class="flex space-x-3 mb-4">
+                        ${personButtons}
+                    </div>
+                    <div class="space-y-3">
+                        ${cart[currentPersonIndex].items.length > 0 ? cart[currentPersonIndex].items.map(item => `
+                                                            <div class="flex justify-between items-start bg-gray-50 rounded-lg p-3">
+                                                                <div class="flex-1">
+                                                                    <p class="font-medium text-sm">${item.name}</p>
+                                                                    <div class="flex items-center space-x-2 mt-1">
+                                                                        <button onclick="updateQuantity('${item.id}', -1, ${item.price})" 
+                                                                            class="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg text-xs">−</button>
+                                                                        <span class="text-sm font-medium">${item.quantity}</span>
+                                                                        <button onclick="updateQuantity('${item.id}', 1, ${item.price})" 
+                                                                            class="bg-red-500 text-white px-2 py-1 rounded-lg text-xs">+</button>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="text-right">
+                                                                    <p class="text-sm font-medium text-red-500">
+                                                                        Rp${(item.price * item.quantity).toLocaleString('id-ID')}
+                                                                    </p>
+                                                                    <button onclick="removeItem('${item.id}')" 
+                                                                        class="text-gray-400 hover:text-red-500 text-xs mt-1">Hapus</button>
+                                                                </div>
+                                                            </div>
+                                                        `).join('') : '<p class="text-sm text-gray-500">Belum ada item</p>'}
+                    </div>
+                `;
+
+                mobileItems.innerHTML = cartHTML;
+                desktopItems.innerHTML = cartHTML;
+
+                // Reset dan perbarui kuantitas menu
+                resetMenuSelections();
+            }
+
+            function selectPerson(index) {
+                currentPersonIndex = index;
+                updateCartDisplay();
+            }
+
+            function resetMenuSelections() {
+                // Reset semua kuantitas ke 0
+                document.querySelectorAll('[id^="qty-"]').forEach(el => {
+                    const id = el.id.replace('qty-', '');
+                    // Hitung total kuantitas untuk item ini hanya untuk orang yang aktif
+                    const qtyForCurrentPerson = cart[currentPersonIndex].items
+                        .filter(item => item.id === id)
+                        .reduce((sum, item) => sum + item.quantity, 0);
+                    el.textContent = qtyForCurrentPerson;
+                });
+            }
+
+            function addNewPerson() {
+                const newPersonNumber = cart.length + 1;
+                cart.push({
+                    person: `Orang ${newPersonNumber}`,
+                    items: []
+                });
+                currentPersonIndex = cart.length - 1; // Jadikan orang baru sebagai orang aktif
+                updateCartDisplay();
             }
 
             document.addEventListener('click', function(event) {
@@ -732,79 +813,80 @@
             };
 
             window.updateQuantity = function(id, change, price) {
-                const itemIndex = cart.findIndex(item => item.id === id);
-                const stockElement = document.getElementById(`stock-${id}`);
-                if (!stockElement) return;
+                // Konversi price ke angka dan periksa apakah valid
+                price = parseFloat(price);
+                if (isNaN(price)) {
+                    console.error(`Harga untuk item ${id} bukan angka: ${price}`);
+                    Swal.fire('Error!', 'Harga item tidak valid', 'error');
+                    return;
+                }
 
+                const person = cart[currentPersonIndex];
+                const itemIndex = person.items.findIndex(item => item.id === id);
+                const stockElement = document.getElementById(`stock-${id}`);
                 let currentStock = parseInt(stockElement.textContent);
 
                 if (itemIndex > -1) {
-                    const newQty = cart[itemIndex].quantity + change;
-
-                    // Tidak boleh kurang dari 0
+                    const newQty = person.items[itemIndex].quantity + change;
                     if (newQty < 0) return;
-
-                    // Jika menambah item (change > 0), periksa stok
                     if (change > 0 && currentStock < change) {
                         Swal.fire('Stok tidak cukup!', `Stok tersisa hanya ${currentStock} item`, 'warning');
                         return;
                     }
-
                     if (newQty === 0) {
-                        // Hapus item dari keranjang jika kuantitas menjadi 0
-                        stockElement.textContent = currentStock + cart[itemIndex].quantity;
-                        cart.splice(itemIndex, 1);
-                        document.getElementById(`qty-${id}`).textContent = 0;
+                        stockElement.textContent = currentStock + person.items[itemIndex].quantity;
+                        person.items.splice(itemIndex, 1);
                     } else {
-                        // Perbarui kuantitas dan stok
-                        cart[itemIndex].quantity = newQty;
+                        person.items[itemIndex].quantity = newQty;
                         stockElement.textContent = currentStock - change;
-                        document.getElementById(`qty-${id}`).textContent = newQty;
                     }
                 } else if (change === 1) {
-                    // Jika item belum ada di keranjang dan ingin ditambah
                     if (currentStock < 1) {
                         Swal.fire('Stok habis!', '', 'warning');
                         return;
                     }
-                    cart.push({
+                    person.items.push({
                         id: id,
                         name: document.querySelector(`#qty-${id}`).parentElement.parentElement.parentElement
                             .querySelector('h3').textContent,
-                        price: price,
+                        price: price, // Harga sudah dipastikan angka
                         quantity: 1
                     });
                     stockElement.textContent = currentStock - 1;
-                    document.getElementById(`qty-${id}`).textContent = 1;
                 }
-
                 updateCartDisplay();
             };
 
             function removeItem(id) {
-                const itemIndex = cart.findIndex(item => item.id === id);
-                const removedItem = cart[itemIndex];
+                const person = cart[currentPersonIndex];
+                const itemIndex = person.items.findIndex(item => item.id === id);
+                if (itemIndex === -1) return;
+
+                const removedItem = person.items[itemIndex];
                 const stockElement = document.getElementById(`stock-${id}`);
 
                 if (stockElement) {
                     stockElement.textContent = parseInt(stockElement.textContent) + removedItem.quantity;
                 }
 
-                cart = cart.filter(item => item.id !== id);
-                document.getElementById(`qty-${id}`).textContent = 0;
+                person.items.splice(itemIndex, 1);
                 updateCartDisplay();
             }
 
             function clearCart() {
-                cart.forEach(item => {
-                    const stockElement = document.getElementById(`stock-${item.id}`);
-                    if (stockElement) {
-                        stockElement.textContent = parseInt(stockElement.textContent) + item.quantity;
-                    }
+                cart.forEach(person => {
+                    person.items.forEach(item => {
+                        const stockElement = document.getElementById(`stock-${item.id}`);
+                        if (stockElement) {
+                            stockElement.textContent = parseInt(stockElement.textContent) + item.quantity;
+                        }
+                    });
                 });
-                cart = [];
-                document.querySelectorAll('[id^="qty-"]').forEach(el => el.textContent = 0);
-                document.getElementById('mobileCart').innerHTML = '';
+                cart = [{
+                    person: "Orang 1",
+                    items: []
+                }];
+                currentPersonIndex = 0;
                 updateCartDisplay();
             }
 
@@ -833,20 +915,36 @@
 
             // Panggil saat modal dibuka
             function openCheckoutModal() {
-                showModal('checkoutModal');
-                if (cart.length === 0) {
+                if (cart.every(person => person.items.length === 0)) {
                     Swal.fire('Keranjang kosong!', 'Silakan tambahkan item terlebih dahulu', 'warning');
                     return;
                 }
+                showModal('checkoutModal');
 
-                document.getElementById('orderItems').innerHTML = cart.map(item => `
-        <div class="flex justify-between">
-            <span>${item.name} (Qty: ${item.quantity})</span>
-            <span>Rp${(item.price * item.quantity).toLocaleString('id-ID')}</span>
-        </div>
-    `).join('');
+                // Tampilkan item dari semua orang
+                const orderItemsHTML = cart.flatMap(person =>
+                    person.items.map(item => `
+            <div class="flex justify-between">
+                <span>${item.name} (${person.person}, Qty: ${item.quantity})</span>
+                <span>Rp${(item.price * item.quantity).toLocaleString('id-ID')}</span>
+            </div>
+        `)
+                ).join('');
 
-                const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+                document.getElementById('orderItems').innerHTML = orderItemsHTML;
+
+                // Hitung total harga dari semua item di semua orang
+                const total = cart.reduce((acc, person) =>
+                    acc + person.items.reduce((sum, item) => {
+                        const price = parseFloat(item.price);
+                        if (isNaN(price)) {
+                            console.error(`Harga tidak valid untuk item ${item.id}: ${item.price}`);
+                            return sum;
+                        }
+                        return sum + (price * item.quantity);
+                    }, 0),
+                    0);
+
                 document.getElementById('modalTotal').textContent = `Rp${total.toLocaleString('id-ID')}`;
                 document.getElementById('cartDropdown').classList.add('hidden');
                 document.getElementById('mobileCartPanel')?.classList.add('hidden');
@@ -934,28 +1032,41 @@
                     return;
                 }
 
+                // Hitung total harga dari semua item
+                const totalPrice = cart.reduce((acc, person) =>
+                    acc + person.items.reduce((sum, item) => {
+                        const price = parseFloat(item.price);
+                        if (isNaN(price)) {
+                            console.error(`Harga tidak valid untuk item ${item.id}: ${item.price}`);
+                            return sum;
+                        }
+                        return sum + (price * item.quantity);
+                    }, 0),
+                    0);
+
                 const orderData = {
                     table_id: tableNumber,
                     spiciness_level: spicinessLevel,
                     bowl_size: bowlSize,
-                    items: cart,
-                    total_price: cart.reduce((acc, item) => acc + (item.price * item.quantity), 0)
+                    items: cart, // Simpan seluruh struktur cart (array of persons)
+                    total_price: totalPrice
                 };
 
                 sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
 
                 // Tampilkan item di modal pembayaran
                 const paymentOrderItems = document.getElementById('paymentOrderItems');
-                paymentOrderItems.innerHTML = cart.map(item => `
-                    <div class="flex justify-between">
-                        <span>${item.name} (Qty: ${item.quantity})</span>
-                        <span>Rp${(item.price * item.quantity).toLocaleString('id-ID')}</span>
-                    </div>
-                `).join('');
+                paymentOrderItems.innerHTML = cart.flatMap(person =>
+                    person.items.map(item => `
+            <div class="flex justify-between">
+                <span>${item.name} (${person.person}, Qty: ${item.quantity})</span>
+                <span>Rp${(item.price * item.quantity).toLocaleString('id-ID')}</span>
+            </div>
+        `)
+                ).join('');
 
                 // Update total harga
-                document.getElementById('paymentTotal').textContent =
-                    `Rp${orderData.total_price.toLocaleString('id-ID')}`;
+                document.getElementById('paymentTotal').textContent = `Rp${totalPrice.toLocaleString('id-ID')}`;
 
                 // Buka modal pembayaran
                 closeCheckoutModal();
@@ -1007,10 +1118,13 @@
                     spiciness_level: orderData.spiciness_level,
                     bowl_size: orderData.bowl_size,
                     total_price: orderData.total_price,
-                    items: cart.map(item => ({
-                        id: item.id,
-                        quantity: item.quantity
-                    }))
+                    items: orderData.items.flatMap(person =>
+                        person.items.map(item => ({
+                            id: item.id,
+                            quantity: item.quantity,
+                            price: parseFloat(item.price) // Pastikan harga adalah angka
+                        }))
+                    )
                 }));
 
                 try {
@@ -1050,10 +1164,15 @@
                 const selectedOption = select.querySelector(`option[value="${tableId}"]`);
                 const statusMessage = document.getElementById('tableStatusMessage');
 
+                if (tableId === 'takeaway') {
+                    statusMessage.innerHTML = '<span class="text-blue-500">ℹ️ Tidak memerlukan meja untuk Take Away</span>';
+                    return;
+                }
+
                 if (selectedOption) {
                     if (selectedOption.disabled) {
                         statusMessage.innerHTML = '<span class="text-red-500">⛔ Meja sedang digunakan!</span>';
-                        select.value = '';
+                        select.value = ''; // Reset to empty if occupied
                     } else {
                         statusMessage.innerHTML = '<span class="text-green-500">✅ Meja tersedia</span>';
                     }
@@ -1072,14 +1191,17 @@
                     const select = document.getElementById('tableNumber');
                     const currentValue = select.value;
 
-                    select.innerHTML = '<option value="">Pilih Meja</option>';
+                    select.innerHTML = `
+                        <option value="">Pilih Meja</option>
+                        <option value="takeaway">Take Away</option>
+                    `;
                     tables.forEach(table => {
                         const option = new Option(
                             `Meja ${table.number} - ${table.status === 'occupied' ? '(Terisi)' : '(Tersedia)'}`,
                             table.id
                         );
                         option.dataset.status = table.status;
-                        option.disabled = table.status.toLowerCase() === 'occupied'; // Normalkan case
+                        option.disabled = table.status.toLowerCase() === 'occupied';
                         select.appendChild(option);
                     });
 
@@ -1288,6 +1410,22 @@
                 if (event.target.id === 'imageModal') {
                     closeImageModal();
                 }
+            }
+
+            function showTableInfoAlert() {
+                Swal.fire({
+                    title: 'Informasi Meja',
+                    text: 'Jika meja yang Anda tempati kosong tetapi tidak bisa di pilih dalam website, silakan hubungi kasir.',
+                    icon: 'info',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#ef4444',
+                    customClass: {
+                        popup: 'rounded-xl',
+                        title: 'text-lg font-bold text-gray-800',
+                        content: 'text-sm text-gray-600',
+                        confirmButton: 'px-4 py-2 rounded-md'
+                    }
+                });
             }
         </script>
     </body>

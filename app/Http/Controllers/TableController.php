@@ -44,14 +44,20 @@ class TableController extends Controller
 
             $table = Table::create([
                 'number' => 'MEJA-' . str_pad($nextNumber, 2, '0', STR_PAD_LEFT),
-                'status' => 'available'
+                'status' => 'available',
+                'occupied_at' => null
             ]);
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'table' => $table
+                'table' => [
+                    'id' => $table->id,
+                    'number' => $table->number,
+                    'status' => $table->status,
+                    'occupied_at' => $table->occupied_at ? $table->occupied_at->toIso8601String() : null
+                ]
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -60,32 +66,42 @@ class TableController extends Controller
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
-
-        $table = Table::findOrFail($request->table_id);
-
-        if ($table->is_occupied) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Meja sudah dipakai'
-            ], 400);
-        }
     }
+
     public function update(Request $request, $id)
     {
         try {
             $request->validate([
-                'number' => 'sometimes|required|max:255|unique:tables,number,' . $id, // Tambahkan 'sometimes'
-                'status' => 'required|in:available,occupied'
+                'number' => 'sometimes|required|max:255|unique:tables,number,' . $id,
+                'status' => 'required|in:available,occupied',
+                'occupied_at' => 'nullable|date'
             ]);
 
             $table = Table::findOrFail($id);
 
-            // Update hanya field yang ada di request
+            // Update field yang ada di request
             $table->update($request->only(['number', 'status']));
+
+            // Atur occupied_at berdasarkan status
+            $table->occupied_at = $request->status === 'occupied' 
+                ? ($request->input('occupied_at') ?? now())
+                : null;
+            $table->save(); // Simpan perubahan occupied_at
+
+            \Log::debug('Memperbarui meja', [
+                'id' => $id,
+                'status' => $request->status,
+                'occupied_at' => $table->occupied_at
+            ]);
 
             return response()->json([
                 'success' => true,
-                'table' => $table
+                'table' => [
+                    'id' => $table->id,
+                    'number' => $table->number,
+                    'status' => $table->status,
+                    'occupied_at' => $table->occupied_at ? $table->occupied_at->toIso8601String() : null
+                ]
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -120,6 +136,29 @@ class TableController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getAll()
+    {
+        try {
+            $tables = Table::select('id', 'number', 'status', 'occupied_at')
+                ->get()
+                ->map(function ($table) {
+                    return [
+                        'id' => $table->id,
+                        'number' => $table->number,
+                        'status' => $table->status,
+                        'occupied_at' => $table->occupied_at ? $table->occupied_at->toIso8601String() : null
+                    ];
+                });
+
+            return response()->json($tables);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
     }

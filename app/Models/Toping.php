@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Toping extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'category_id', 'price', 'stock', 'image'];
+    protected $fillable = ['name', 'category_id', 'price','price_buy', 'stock', 'image'];
 
     public function category() {
         return $this->belongsTo(Category::class);
@@ -17,7 +17,6 @@ class Toping extends Model
         return $this->belongsToMany (Transaction::class, 'transaction_topings') ->withPivot('quantity');
         
     }
-    
 
     public function transactionDetails()
     {

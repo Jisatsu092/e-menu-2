@@ -48,7 +48,6 @@
                                         <td class="px-6 py-4 capitalize">{{ $transaction->spiciness_level }}</td>
                                         <td class="px-6 py-4">
                                             Rp{{ number_format($transaction->total_price, 0, ',', '.') }}</td>
-                                        {{-- Di bagian tampilan payment provider --}}
                                         <td class="px-6 py-4">
                                             @if ($transaction->paymentProvider)
                                                 <div class="flex items-center gap-2">
@@ -60,18 +59,17 @@
                                                 <span class="text-red-500">-</span>
                                             @endif
                                         </td>
-
-                                        {{-- Di bagian tampilan payment proof --}}
                                         <td class="px-6 py-4">
                                             @if ($transaction->payment_proof)
-                                                <a href="{{ asset('storage/' . $transaction->payment_proof) }}"
-                                                    target="_blank" class="inline-block group relative">
+                                                <button onclick="showImageModal('{{ asset('storage/' . $transaction->payment_proof) }}')"
+                                                    class="inline-block group relative">
                                                     <img src="{{ asset('storage/' . $transaction->payment_proof) }}"
-                                                        class="w-16 h-16 object-cover rounded-lg border-2 border-blue-200 transition-transform group-hover:scale-110">
+                                                        class="w-16 h-16 object-cover rounded-lg border-2 border-blue-200 transition-transform group-hover:scale-110"
+                                                        alt="Bukti pembayaran transaksi {{ $transaction->id }}">
                                                     <span
                                                         class="absolute bottom-1 right-1 bg-black/50 text-white text-xs px-2 py-1 rounded-full">🔍
                                                         Lihat</span>
-                                                </a>
+                                                </button>
                                             @else
                                                 -
                                             @endif
@@ -134,7 +132,7 @@
             <div class="flex items-start justify-between p-6 border-b-2 border-blue-600">
                 <h3 class="text-xl font-semibold text-blue-600">➕ Tambah Transaksi Baru</h3>
                 <button onclick="toggleModal('createTransactionModal')"
-                    class="text-blue-600 hover:text-blue-800 text-2xl">&times;</button>
+                    class="text-blue-600 hover:text-blue-800 text-2xl">×</button>
             </div>
             <form id="createTransactionForm" action="{{ route('transaction.store') }}" method="POST" class="p-6"
                 enctype="multipart/form-data">
@@ -148,8 +146,7 @@
                             required>
                             <option value="">Pilih User</option>
                             @foreach ($users as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})
-                                </option>
+                                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
                             @endforeach
                         </select>
                     </div>
@@ -248,7 +245,7 @@
             <div class="flex items-start justify-between p-6 border-b-2 border-blue-600">
                 <h3 class="text-xl font-semibold text-blue-600">✏️ Edit Transaksi</h3>
                 <button onclick="toggleModal('editTransactionModal')"
-                    class="text-blue-600 hover:text-blue-800 text-2xl">&times;</button>
+                    class="text-blue-600 hover:text-blue-800 text-2xl">×</button>
             </div>
             <form id="editTransactionForm" method="POST" class="p-6" enctype="multipart/form-data">
                 @csrf
@@ -263,8 +260,7 @@
                             required>
                             <option value="">Pilih User</option>
                             @foreach ($users as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})
-                                </option>
+                                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
                             @endforeach
                         </select>
                     </div>
@@ -360,8 +356,21 @@
         </div>
     </div>
 
+    <!-- Image Preview Modal -->
+    <div id="imageModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-90 flex items-center justify-center"
+         onclick="closeImageModalIfBackground(event)">
+        <div class="max-w-4xl max-h-[90vh]">
+            <img id="modalImage" class="max-h-[80vh] rounded-lg" alt="Bukti pembayaran">
+            <button onclick="closeImageModal()"
+                    class="absolute top-4 right-4 text-white text-3xl hover:text-gray-200">
+                ×
+            </button>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.13.5/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         document.addEventListener('alpine:init', () => {
@@ -380,6 +389,26 @@
             modal.classList.toggle('hidden');
             modal.classList.toggle('flex');
         }
+
+        window.showImageModal = function(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalImage');
+            modalImage.src = imageSrc;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        };
+
+        window.closeImageModal = function() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        };
+
+        window.closeImageModalIfBackground = function(event) {
+            if (event.target.id === 'imageModal') {
+                closeImageModal();
+            }
+        };
 
         window.editTransactionModal = function(button) {
             const transactionData = {
@@ -409,6 +438,8 @@
             if (transactionData.payment_proof) {
                 currentProof.src = "{{ asset('storage') }}/" + transactionData.payment_proof;
                 document.getElementById('current_proof').classList.remove('hidden');
+            } else {
+                document.getElementById('current_proof').classList.add('hidden');
             }
 
             toggleModal('editTransactionModal');
@@ -437,7 +468,7 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        status: 'proses' // Langsung set status proses
+                        status: 'proses'
                     })
                 });
 
@@ -531,14 +562,11 @@
     <style>
         .modal-scrollable {
             scrollbar-width: none;
-            /* Firefox */
             -ms-overflow-style: none;
-            /* IE/Edge */
         }
 
         .modal-scrollable::-webkit-scrollbar {
             display: none;
-            /* Chrome/Safari */
         }
 
         .modal-transition {
@@ -559,6 +587,24 @@
 
         .capitalize {
             text-transform: capitalize;
+        }
+
+        #imageModal {
+            backdrop-filter: blur(5px);
+        }
+
+        #imageModal img {
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (min-width: 768px) {
+            #modalImage {
+                max-height: 80vh;
+            }
+        }
+
+        #modalImage:hover {
+            transform: scale(1.02);
         }
     </style>
 </x-app-layout>

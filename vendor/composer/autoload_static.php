@@ -571,7 +571,6 @@ class ComposerStaticInit640b6a41b777ff8e4a08e41eb88cb5f2
         'App\\Http\\Controllers\\TableController' => __DIR__ . '/../..' . '/app/Http/Controllers/TableController.php',
         'App\\Http\\Controllers\\TopingController' => __DIR__ . '/../..' . '/app/Http/Controllers/TopingController.php',
         'App\\Http\\Controllers\\TransactionController' => __DIR__ . '/../..' . '/app/Http/Controllers/TransactionController.php',
-        'App\\Http\\Controllers\\TransactionDetailController' => __DIR__ . '/../..' . '/app/Http/Controllers/TransactionDetailController.php',
         'App\\Http\\Controllers\\TransactionTopingController' => __DIR__ . '/../..' . '/app/Http/Controllers/TransactionTopingController.php',
         'App\\Http\\Controllers\\userInterfaceController' => __DIR__ . '/../..' . '/app/Http/Controllers/userInterfaceController.php',
         'App\\Http\\Middleware\\RoleMiddelware' => __DIR__ . '/../..' . '/app/Http/Middleware/RoleMiddelware.php',

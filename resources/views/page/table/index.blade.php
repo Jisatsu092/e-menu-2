@@ -31,31 +31,31 @@
                             </thead>
                             <tbody id="tableBody">
                                 @foreach ($tables as $table)
-                                    <tr id="row-{{ $table->id }}" class="bg-white border-b hover:bg-red-50">
+                                    <tr id="row-{{ $table->id }}" class="bg-white border-b hover:bg-red-50"
+                                        data-occupied-at="{{ $table->status === 'occupied' && $table->occupied_at ? $table->occupied_at->toIso8601String() : '' }}">
                                         <td class="px-6 py-4 font-semibold">{{ $loop->iteration }}</td>
                                         <td class="px-6 py-4 font-bold text-red-600">{{ $table->number }}</td>
                                         <td class="px-6 py-4">
                                             <span
                                                 class="px-3 py-1.5 text-sm font-semibold rounded-full 
-                                                {{ $table->status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                {{ $table->status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}"
+                                                id="status-{{ $table->id }}">
                                                 {{ strtoupper($table->status) }}
                                             </span>
+                                            @if ($table->status === 'occupied' && $table->occupied_at)
+                                                <span id="timer-{{ $table->id }}" class="ml-2 text-xs text-gray-600" aria-live="polite"></span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 space-x-2">
-                                            <!-- Tombol Edit -->
                                             <button
                                                 onclick="openEditModal('{{ $table->id }}', '{{ $table->number }}', '{{ $table->status }}')"
                                                 class="bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-md text-sm text-white shadow">
                                                 ✏️ Edit
                                             </button>
-
-                                            <!-- Tombol Set Available (Baru) -->
                                             <button onclick="setAvailable('{{ $table->id }}')"
                                                 class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-md text-sm text-white shadow">
                                                 ✅ Available
                                             </button>
-
-                                            <!-- Tombol Hapus -->
                                             <button onclick="deleteTable('{{ $table->id }}')"
                                                 class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md text-sm text-white shadow">
                                                 🗑️ Hapus
@@ -106,6 +106,124 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        // Fungsi untuk memformat waktu (MM:SS)
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Fungsi untuk memulai countdown timer untuk meja
+        function startCountdown(tableId, occupiedAt) {
+            const timerElement = document.getElementById(`timer-${tableId}`);
+            if (!timerElement) {
+                console.error(`Elemen timer untuk meja ${tableId} tidak ditemukan`);
+                return;
+            }
+
+            let occupiedTime;
+            try {
+                occupiedTime = new Date(occupiedAt).getTime();
+                if (isNaN(occupiedTime)) {
+                    throw new Error('Tanggal tidak valid');
+                }
+            } catch (error) {
+                console.error(`occupied_at tidak valid untuk meja ${tableId}: ${occupiedAt}`, error);
+                return;
+            }
+
+            const oneHour = 3600 * 1000; // 1 jam dalam milidetik
+            const endTime = occupiedTime + oneHour;
+
+            const updateTimer = () => {
+                const now = new Date().getTime();
+                const remaining = Math.max(0, Math.floor((endTime - now) / 1000));
+
+                if (remaining > 0) {
+                    timerElement.textContent = `Tersisa: ${formatTime(remaining)}`;
+                    setTimeout(updateTimer, 1000);
+                } else {
+                    timerElement.textContent = '';
+                    setAvailable(tableId); // Otomatis set ke available
+                }
+            };
+
+            updateTimer();
+        }
+
+        // Inisialisasi timer untuk meja yang occupied setelah DOM dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(row => {
+                const tableId = row.id.replace('row-', '');
+                const statusElement = row.querySelector(`#status-${tableId}`);
+                const occupiedAt = row.dataset.occupiedAt;
+
+                if (statusElement.textContent.trim().toUpperCase() === 'OCCUPIED' && occupiedAt) {
+                    let timerElement = document.getElementById(`timer-${tableId}`);
+                    if (!timerElement) {
+                        timerElement = document.createElement('span');
+                        timerElement.id = `timer-${tableId}`;
+                        timerElement.className = 'ml-2 text-xs text-gray-600';
+                        timerElement.setAttribute('aria-live', 'polite');
+                        statusElement.parentElement.appendChild(timerElement);
+                    }
+                    try {
+                        startCountdown(tableId, occupiedAt);
+                    } catch (error) {
+                        console.error(`Gagal memulai countdown untuk meja ${tableId}:`, error);
+                    }
+                }
+            });
+        });
+
+        // Polling untuk pembaruan status meja secara real-time
+        function pollTableStatus() {
+            fetch('/tables', {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(tables => {
+                tables.forEach(table => {
+                    const row = document.getElementById(`row-${table.id}`);
+                    if (!row) return;
+
+                    const statusBadge = row.querySelector(`#status-${table.id}`);
+                    const timerCell = row.querySelector('td:nth-child(3)');
+                    let timerElement = row.querySelector(`#timer-${table.id}`);
+
+                    // Update status
+                    statusBadge.textContent = table.status.toUpperCase();
+                    statusBadge.className = `px-3 py-1.5 text-sm font-semibold rounded-full 
+                        ${table.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+                    row.dataset.occupiedAt = table.occupied_at || '';
+
+                    // Handle timer
+                    if (table.status === 'occupied' && table.occupied_at) {
+                        if (!timerElement) {
+                            timerElement = document.createElement('span');
+                            timerElement.id = `timer-${table.id}`;
+                            timerElement.className = 'ml-2 text-xs text-gray-600';
+                            timerElement.setAttribute('aria-live', 'polite');
+                            timerCell.appendChild(timerElement);
+                        }
+                        startCountdown(table.id, table.occupied_at);
+                    } else if (timerElement) {
+                        timerElement.textContent = '';
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error saat polling status meja:', error);
+            });
+        }
+
+        // Mulai polling setiap 10 detik
+        setInterval(pollTableStatus, 10000);
+
         // Tambah Meja Otomatis
         async function createTable() {
             try {
@@ -124,11 +242,11 @@
 
                 if (response.ok) {
                     const newRow = `
-                        <tr id="row-${data.table.id}" class="bg-white border-b hover:bg-red-50">
+                        <tr id="row-${data.table.id}" class="bg-white border-b hover:bg-red-50" data-occupied-at="">
                             <td class="px-6 py-4 font-semibold">${document.querySelectorAll('#tableBody tr').length + 1}</td>
                             <td class="px-6 py-4 font-bold text-red-600">${data.table.number}</td>
                             <td class="px-6 py-4">
-                                <span class="px-3 py-1.5 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+                                <span class="px-3 py-1.5 text-sm font-semibold rounded-full bg-green-100 text-green-800" id="status-${data.table.id}">
                                     AVAILABLE
                                 </span>
                             </td>
@@ -137,7 +255,7 @@
                                     class="bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-md text-sm text-white shadow">
                                     ✏️ Edit
                                 </button>
-                                <button onclick="setAvailable('{{ $table->id }}')"
+                                <button onclick="setAvailable('${data.table.id}')"
                                     class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-md text-sm text-white shadow">
                                     ✅ Available
                                 </button>
@@ -179,7 +297,8 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        status: 'available' // Hanya kirim status
+                        status: 'available',
+                        occupied_at: null
                     })
                 });
 
@@ -187,10 +306,13 @@
 
                 if (response.ok) {
                     const row = document.getElementById(`row-${id}`);
-                    const statusBadge = row.querySelector('span');
+                    const statusBadge = row.querySelector(`#status-${id}`);
                     statusBadge.textContent = 'AVAILABLE';
                     statusBadge.className =
                         'px-3 py-1.5 text-sm font-semibold rounded-full bg-green-100 text-green-800';
+                    const timerElement = document.getElementById(`timer-${id}`);
+                    if (timerElement) timerElement.textContent = '';
+                    row.dataset.occupiedAt = '';
 
                     Swal.fire({
                         icon: 'success',
@@ -217,25 +339,32 @@
             document.getElementById('editNumber').value = number;
             document.getElementById('editStatus').value = status;
             document.getElementById('editModal').classList.remove('hidden');
+            document.getElementById('editModal').classList.add('flex');
         }
 
         function closeEditModal() {
             document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('editModal').classList.remove('flex');
         }
 
         document.getElementById('editForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const number = document.getElementById('editNumber').value;
+            const status = document.getElementById('editStatus').value;
 
             try {
-                const response = await fetch(`/table/${document.getElementById('editId').value}`, {
+                const occupiedAt = status === 'occupied' ? new Date().toISOString() : null;
+                const response = await fetch(`/table/${id}`, {
                     method: 'PUT',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        number: document.getElementById('editNumber').value,
-                        status: document.getElementById('editStatus').value
+                        number: number,
+                        status: status,
+                        occupied_at: occupiedAt
                     })
                 });
 
@@ -244,11 +373,28 @@
                 if (response.ok) {
                     const row = document.getElementById(`row-${data.table.id}`);
                     row.querySelector('td:nth-child(2)').textContent = data.table.number;
-                    const statusBadge = row.querySelector('span');
+                    const statusBadge = row.querySelector(`#status-${data.table.id}`);
                     statusBadge.textContent = data.table.status.toUpperCase();
                     statusBadge.className =
                         `px-3 py-1.5 text-sm font-semibold rounded-full 
                         ${data.table.status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`;
+                    row.dataset.occupiedAt = data.table.occupied_at || '';
+
+                    // Handle timer for occupied status
+                    const timerCell = row.querySelector('td:nth-child(3)');
+                    let timerElement = row.querySelector(`#timer-${data.table.id}`);
+                    if (data.table.status === 'occupied' && data.table.occupied_at) {
+                        if (!timerElement) {
+                            timerElement = document.createElement('span');
+                            timerElement.id = `timer-${data.table.id}`;
+                            timerElement.className = 'ml-2 text-xs text-gray-600';
+                            timerElement.setAttribute('aria-live', 'polite');
+                            timerCell.appendChild(timerElement);
+                        }
+                        startCountdown(data.table.id, data.table.occupied_at);
+                    } else if (timerElement) {
+                        timerElement.textContent = '';
+                    }
 
                     closeEditModal();
                     Swal.fire({
@@ -286,8 +432,7 @@
                         const response = await fetch(`/table/${id}`, {
                             method: 'DELETE',
                             headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                    .content
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                             }
                         });
 

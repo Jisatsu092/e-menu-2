@@ -11,18 +11,16 @@ use App\Models\TransactionDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class userInterfaceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $topings = Toping::all();
         $paymentProviders = PaymentProvider::all();
         $categories = Category::all();
-        $tables = Table::select('id', 'number')->orderBy('number')->get();
+        $tables = Table::select('id', 'number', 'status', 'occupied_at')->orderBy('number')->get();
         return view('page.user_interface.index', [
             'topings' => $topings,
             'categories' => $categories,
@@ -31,59 +29,19 @@ class userInterfaceController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'table_id' => 'required|exists:tables,id',
         ]);
 
-        // Update status meja jadi occupied
-        $table = Table::find($request->table_id);
-        $table->status = 'occupied';
-        $table->save();
-    }
+        $table = Table::findOrFail($request->table_id);
+        $table->update([
+            'status' => 'occupied',
+            'occupied_at' => now()
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json(['success' => true, 'message' => 'Table status updated']);
     }
 
     public function confirmPayment(Request $request)
@@ -91,6 +49,7 @@ class userInterfaceController extends Controller
         $request->validate([
             'payment_proof' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'provider_id' => 'required|exists:payment_providers,id',
+            'order_data' => 'required|json',
         ]);
 
         try {
@@ -99,30 +58,57 @@ class userInterfaceController extends Controller
             // Parse order data
             $orderData = json_decode($request->input('order_data'), true);
 
+            // Validate order data
+            if (!isset($orderData['table_id'], $orderData['spiciness_level'], $orderData['bowl_size'], $orderData['items'])) {
+                throw new \Exception('Invalid order data');
+            }
+
+            // Validasi bahwa ada setidaknya satu topping
+            if (empty($orderData['items'])) {
+                throw new \Exception('Pesanan harus memiliki setidaknya satu topping.');
+            }
+
+            // Hitung total_price berdasarkan price_buy
+            $totalPrice = 0;
+            foreach ($orderData['items'] as $item) {
+                $toping = Toping::findOrFail($item['id']);
+                if ($toping->stock < $item['quantity']) {
+                    throw new \Exception("Stok {$toping->name} tidak cukup.");
+                }
+                $totalPrice += $toping->price_buy * $item['quantity'];
+            }
+
             // Create transaction
             $transaction = Transaction::create([
                 'user_id' => Auth::id(),
-                'table_id' => $orderData['table_id'],
+                'table_id' => $orderData['table_id'] === 'takeaway' ? null : $orderData['table_id'],
                 'spiciness_level' => $orderData['spiciness_level'],
                 'bowl_size' => $orderData['bowl_size'],
-                'total_price' => $orderData['total_price'],
+                'total_price' => $totalPrice,
                 'status' => 'pending',
                 'payment_provider_id' => $request->provider_id,
             ]);
 
-            // TAMBAHKAN INI: Update status meja
-            $table = Table::find($orderData['table_id']);
-            $table->update(['status' => 'occupied']);
+            // Update table status and occupied_at
+            if ($orderData['table_id'] !== 'takeaway') {
+                $table = Table::findOrFail($orderData['table_id']);
+                $occupiedAt = isset($orderData['occupied_at']) && Carbon::parse($orderData['occupied_at'])->isValid()
+                    ? Carbon::parse($orderData['occupied_at'])
+                    : now();
+                $table->update([
+                    'status' => 'occupied',
+                    'occupied_at' => $occupiedAt
+                ]);
+            }
 
             // Create transaction details
             foreach ($orderData['items'] as $item) {
                 $toping = Toping::findOrFail($item['id']);
-
                 TransactionDetail::create([
                     'transaction_id' => $transaction->id,
                     'toping_id' => $item['id'],
                     'quantity' => $item['quantity'],
-                    'subtotal' => $toping->price * $item['quantity'],
+                    'subtotal' => $toping->price_buy * $item['quantity'],
                 ]);
 
                 // Update stock
@@ -155,11 +141,16 @@ class userInterfaceController extends Controller
     {
         try {
             $transaction = Transaction::findOrFail($id);
-            $transaction->table->update(['status' => 'available']);
+            if ($transaction->table) {
+                $transaction->table->update([
+                    'status' => 'available',
+                    'occupied_at' => null
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Status meja telah diupdate'
+                'message' => 'Table status updated to available'
             ]);
         } catch (\Exception $e) {
             return response()->json([

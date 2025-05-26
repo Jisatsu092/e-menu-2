@@ -2,95 +2,52 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Table;
-use App\Models\Toping;
-use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class TransactionDetailController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Index - Menampilkan semua detail transaksi
     public function index()
     {
-        $transactionDetail = TransactionDetail::latest()->paginate(10);
-        $transaction = Transaction::all();
-        $topings = Toping::all();
+        $transactionDetails = TransactionDetail::with(['transaction', 'toping'])
+            ->latest()
+            ->paginate(10);
+
         return view('page.transaction_detail.index', [
-            'details' => $transactionDetail,
-            'transaction' => $transaction,
-            'toping' => $topings
+            'details' => $transactionDetails
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    // Report - Untuk halaman cetak
+    public function report(Request $request)
     {
-        //
-    }
+        $query = TransactionDetail::with(['transaction', 'toping']);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        // Filter berdasarkan tanggal jika ada
+        if ($request->start_date && $request->end_date) {
+            $start = Carbon::parse($request->start_date)->startOfDay();
+            $end = Carbon::parse($request->end_date)->endOfDay();
+            
+            $query->whereHas('transaction', function($q) use ($start, $end) {
+                $q->whereBetween('created_at', [$start, $end]);
+            });
+        }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Transaction $transaction)
-    {
-        $transaction->load([
-            'details.toping',
-            'user',
-            'table'
+        $groupedTransactions = $query->get()->groupBy('transaction_id');
+
+        return view('page.transaction_detail.report', [
+            'transactions' => $groupedTransactions,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date
         ]);
-
-        return view('transactions.details.show', compact('transaction'));
-    }
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(TransactionDetail $transactionDetail)
-    {
-        //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, TransactionDetail $transactionDetail)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(TransactionDetail $transactionDetail)
-    {
-        //
-    }
-
+    // Hapus semua data
     public function destroyAll()
     {
-        TransactionDetail::query()->delete();
-        return redirect()->back()->with('success', 'All transaction details cleared successfully.');
+        TransactionDetail::truncate();
+        return redirect()->back()->with('success', 'Semua detail transaksi berhasil dihapus');
     }
-
-    public function detailreport()
-    {
-        $transactions = TransactionDetail::with(['transaction', 'toping'])
-            ->get()
-            ->groupBy('transaction_id');
-
-        return view('page.transaction_detail.report', compact('transactions'));
-    }
-
 }

@@ -13,7 +13,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('table_id')->constrained()->onDelete('cascade');
+            $table->foreignId('table_id')->nullable()->constrained()->onDelete('set null');
             $table->string('code')->unique();
             $table->string('bowl_size')->nullable();
             $table->string('spiciness_level');

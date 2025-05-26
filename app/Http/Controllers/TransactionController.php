@@ -275,6 +275,12 @@ class TransactionController extends Controller
             $startDate = $request->start ? Carbon::parse($request->start) : null;
             $endDate = $request->end ? Carbon::parse($request->end)->endOfDay() : null;
 
+            $transactions = Transaction::where('status', '!=', 'cancelled')
+        ->when($request->start, fn($query) => $query->whereDate('created_at', '>=', $request->start))
+        ->when($request->end, fn($query) => $query->whereDate('created_at', '<=', $request->end))
+        ->with(['user', 'table'])
+        ->get();
+
             $query = Transaction::with(['user', 'table', 'paymentProvider'])
                 ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
                     return $q->whereBetween('created_at', [$startDate, $endDate]);

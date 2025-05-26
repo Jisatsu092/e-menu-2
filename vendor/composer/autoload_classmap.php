@@ -26,7 +26,6 @@ return array(
     'App\\Http\\Controllers\\TableController' => $baseDir . '/app/Http/Controllers/TableController.php',
     'App\\Http\\Controllers\\TopingController' => $baseDir . '/app/Http/Controllers/TopingController.php',
     'App\\Http\\Controllers\\TransactionController' => $baseDir . '/app/Http/Controllers/TransactionController.php',
-    'App\\Http\\Controllers\\TransactionDetailController' => $baseDir . '/app/Http/Controllers/TransactionDetailController.php',
     'App\\Http\\Controllers\\TransactionTopingController' => $baseDir . '/app/Http/Controllers/TransactionTopingController.php',
     'App\\Http\\Controllers\\userInterfaceController' => $baseDir . '/app/Http/Controllers/userInterfaceController.php',
     'App\\Http\\Middleware\\RoleMiddelware' => $baseDir . '/app/Http/Middleware/RoleMiddelware.php',

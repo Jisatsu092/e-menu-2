@@ -84,6 +84,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/table/check-number/{number}', [TableController::class, 'checkNumber'])->name('table.checkNumber');
     Route::put('/table/{id}', [TableController::class, 'update'])->name('table.update');
     Route::delete('/table/{id}', [TableController::class, 'destroy'])->name('table.destroy');
+    Route::get('/tables', [TableController::class, 'getAll'])->name('tables.all');
 
     // Rute Khusus Toping
     Route::get('/toping/check-name/{name}', [TopingController::class, 'checkName'])->name('toping.checkName');
@@ -95,15 +96,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/check-status/{transaction}', [TransactionController::class, 'checkStatus'])->name('transaction.checkStatus');
     // Route::get('/transaction/report', [TransactionController::class, 'report'])->name('transaction.report');
     Route::get('/print/transactions/all', [TransactionController::class, 'printAll'])
-    ->name('transaction.print.all');
+        ->name('transaction.print.all');
     Route::get('/transaction/{id}/print', [TransactionController::class, 'print'])->name('transaction.print');
     Route::get('/transaksi/print/{transaction}', [TransactionController::class, 'print'])->name('transaksi.print');
     Route::post('/confirm-payment', [TransactionController::class, 'confirmPayment'])->name('confirm.payment');
 
     // Rute Detail Transaksi
-    Route::get('/transactions/{transaction}/details', [TransactionDetailController::class, 'show'])->name('transaction_details.show');
-    Route::get('/transaction-details/report', [TransactionDetailController::class, 'report'])->name('transaction_details.report');
-    Route::delete('/transaction-details/clear-all', [TransactionDetailController::class, 'destroyAll'])->name('transaction_details.destroyAll');
+    Route::get('/transaction-details', [TransactionDetailController::class, 'index'])->name('transaction_details.index')->middleware('auth');
+    Route::get('/transaction-details/report', [TransactionDetailController::class, 'report'])->name('transaction_details.report')->middleware('auth');
+    Route::delete('/transaction-details/destroy-all', [TransactionDetailController::class, 'destroyAll'])->name('transaction_details.destroyAll')->middleware('auth', 'can:role-A');
 
     // Rute Payment Provider
     Route::put('/payment_providers/{payment_provider}/toggle-status', [PaymentProviderController::class, 'toggleStatus'])->name('payment_providers.toggle-status');

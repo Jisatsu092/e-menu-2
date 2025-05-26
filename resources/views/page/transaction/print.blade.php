@@ -135,7 +135,9 @@
             @foreach($transaction->details as $detail)
             <div class="item-row">
                 <div class="item-name">{{ $detail->toping->name }} ({{ $detail->quantity }}x)</div>
-                <div class="item-price">Rp{{ number_format($detail->price * $detail->quantity, 0, ',', '.') }}</div>
+                <div class="item-price">
+                    Rp{{ number_format(($detail->price ?? $detail->toping->price) * $detail->quantity, 0, ',', '.') }}
+                </div>
             </div>
             @endforeach
         </div>
@@ -164,8 +166,8 @@
             <div class="divider"></div>
             <p style="text-align: center; margin: 2mm 0;">BUKTI PEMBAYARAN</p>
             <img src="{{ asset('storage/' . $transaction->payment_proof) }}" 
-                 alt="Bukti Bayar"
-                 style="max-width: 100%; height: auto; max-height: 40mm;">
+            alt="Bukti Bayar"
+            style="max-width: 100%; height: auto; max-height: 40mm;">
         </div>
         @endif
 

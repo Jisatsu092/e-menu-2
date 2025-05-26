@@ -35,7 +35,8 @@
                                     <th scope="col" class="px-4 py-2 md:px-6 md:py-3">NO</th>
                                     <th scope="col" class="px-4 py-2 md:px-6 md:py-3">NAMA</th>
                                     <th scope="col" class="px-4 py-2 md:px-6 md:py-3">KATEGORI</th>
-                                    <th scope="col" class="px-4 py-2 md:px-6 md:py-3">HARGA</th>
+                                    <th scope="col" class="px-4 py-2 md:px-6 md:py-3">HARGA BELI</th>
+                                    <th scope="col" class="px-4 py-2 md:px-6 md:py-3">HARGA JUAL</th>
                                     <th scope="col" class="px-4 py-2 md:px-6 md:py-3">STOK</th>
                                     <th scope="col" class="px-4 py-2 md:px-6 md:py-3">GAMBAR</th>
                                     <th scope="col" class="px-4 py-2 md:px-6 md:py-3">AKSI</th>
@@ -48,10 +49,10 @@
                                 @foreach ($topings as $toping)
                                     <tr class="bg-white border-b hover:bg-red-50">
                                         <td class="px-4 py-2 md:px-6 md:py-4 font-semibold">{{ $no++ }}</td>
-                                        <td class="px-4 py-2 md:px-6 md:py-4 font-bold text-red-600">{{ $toping->name }}
-                                        </td>
+                                        <td class="px-4 py-2 md:px-6 md:py-4 font-bold text-red-600">{{ $toping->name }}</td>
                                         <td class="px-4 py-2 md:px-6 md:py-4">{{ $toping->category->name ?? '-' }}</td>
                                         <td class="px-4 py-2 md:px-6 md:py-4">@currency($toping->price)</td>
+                                        <td class="px-4 py-2 md:px-6 md:py-4">@currency($toping->price_buy)</td>
                                         <td class="px-4 py-2 md:px-6 md:py-4">{{ $toping->stock }}</td>
                                         <td class="px-4 py-2 md:px-6 md:py-4">
                                             @if ($toping->image)
@@ -59,14 +60,10 @@
                                                     class="w-16 h-16 object-cover rounded-lg shadow"
                                                     alt="Gambar Toping">
                                             @else
-                                                <div
-                                                    class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                                                    <svg class="w-8 h-8 text-gray-400" fill="none"
-                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="1"
-                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                        </path>
+                                                <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                                     </svg>
                                                 </div>
                                             @endif
@@ -74,8 +71,9 @@
                                         <td class="px-4 py-2 md:px-6 md:py-4 space-x-2 flex flex-wrap">
                                             <button data-id="{{ $toping->id }}" data-name="{{ $toping->name }}"
                                                 data-category="{{ $toping->category_id }}"
-                                                data-price="{{ $toping->price }}" data-stock="{{ $toping->stock }}"
-                                                data-image="{{ $toping->image }}" onclick="editTopingModal(this)"
+                                                data-price="{{ $toping->price }}" data-price-buy="{{ $toping->price_buy }}"
+                                                data-stock="{{ $toping->stock }}" data-image="{{ $toping->image }}"
+                                                onclick="editTopingModal(this)"
                                                 class="bg-amber-500 hover:bg-amber-600 px-2 py-1 md:px-4 md:py-2 rounded-md text-xs md:text-sm text-white shadow">
                                                 ✏️ Edit
                                             </button>
@@ -110,7 +108,7 @@
                 <h3 class="text-xl font-semibold text-red-600">🆕 Tambah Toping Baru</h3>
                 <button type="button" onclick="toggleModal('createTopingModal')"
                     class="text-red-600 hover:text-red-800 text-2xl">
-                    &times;
+                    ×
                 </button>
             </div>
             <form id="createForm" action="{{ route('toping.store') }}" method="POST" enctype="multipart/form-data"
@@ -125,8 +123,7 @@
                     </div>
 
                     <div class="mb-4">
-                        <label for="category_create"
-                            class="block mb-2 text-sm font-medium text-red-600">Kategori</label>
+                        <label for="category_create" class="block mb-2 text-sm font-medium text-red-600">Kategori</label>
                         <select name="category_id" id="category_create"
                             class="bg-white border-2 border-red-600 text-red-600 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5"
                             required>
@@ -139,10 +136,17 @@
                     </div>
 
                     <div class="mb-4">
-                        <label for="price_create" class="block mb-2 text-sm font-medium text-red-600">Harga</label>
+                        <label for="price_create" class="block mb-2 text-sm font-medium text-red-600">Harga Beli</label>
                         <input type="number" name="price" id="price_create"
                             class="bg-white border-2 border-red-600 text-red-600 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5"
-                            min="0" required value="{{ old('price') }}">
+                            min="0" required value="{{ old('price') }}" oninput="calculatePriceBuy('create')">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="price_buy_create" class="block mb-2 text-sm font-medium text-red-600">Harga Jual</label>
+                        <input type="number" name="price_buy" id="price_buy_create"
+                            class="bg-gray-100 border-2 border-red-600 text-red-600 text-sm rounded-lg block w-full p-2.5"
+                            readonly value="{{ old('price_buy', 0) }}">
                     </div>
 
                     <div class="mb-4">
@@ -188,7 +192,7 @@
                 <h3 class="text-xl font-semibold text-red-600" id="title_edit">✏️ Update Toping</h3>
                 <button type="button" onclick="toggleModal('editTopingModal')"
                     class="text-red-600 hover:text-red-800 text-2xl">
-                    &times;
+                    ×
                 </button>
             </div>
             <form id="editForm" method="POST" enctype="multipart/form-data" class="p-6">
@@ -203,8 +207,7 @@
                     </div>
 
                     <div class="mb-4">
-                        <label for="category_edit"
-                            class="block mb-2 text-sm font-medium text-red-600">Kategori</label>
+                        <label for="category_edit" class="block mb-2 text-sm font-medium text-red-600">Kategori</label>
                         <select name="category_id" id="category_edit"
                             class="bg-white border-2 border-red-600 text-red-600 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5"
                             required>
@@ -215,10 +218,17 @@
                     </div>
 
                     <div class="mb-4">
-                        <label for="price_edit" class="block mb-2 text-sm font-medium text-red-600">Harga</label>
+                        <label for="price_edit" class="block mb-2 text-sm font-medium text-red-600">Harga Beli</label>
                         <input type="number" name="price" id="price_edit"
                             class="bg-white border-2 border-red-600 text-red-600 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5"
-                            min="0" required>
+                            min="0" required oninput="calculatePriceBuy('edit')">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="price_buy_edit" class="block mb-2 text-sm font-medium text-red-600">Harga Jual</label>
+                        <input type="number" name="price_buy" id="price_buy_edit"
+                            class="bg-gray-100 border-2 border-red-600 text-red-600 text-sm rounded-lg block w-full p-2.5"
+                            readonly>
                     </div>
 
                     <div class="mb-4">
@@ -270,6 +280,10 @@
             if (modalId === 'createTopingModal') {
                 document.getElementById('imagePreviewCreate').classList.add('hidden');
                 document.getElementById('image_create').value = '';
+                document.getElementById('price_buy_create').value = 0;
+            } else if (modalId === 'editTopingModal') {
+                document.getElementById('imagePreviewEdit').classList.add('hidden');
+                document.getElementById('image_edit').value = '';
             }
         }
 
@@ -290,6 +304,17 @@
             }
         }
 
+        // Fungsi Hitung Harga Jual
+        function calculatePriceBuy(type) {
+            const priceInput = document.getElementById(`price_${type}`);
+            const priceBuyInput = document.getElementById(`price_buy_${type}`);
+            const price = parseFloat(priceInput.value) || 0;
+            const margin = price * 0.25;
+            const total = price + margin;
+            const rounded = Math.round(total / 500) * 500; // Bulatkan ke kelipatan 500
+            priceBuyInput.value = rounded;
+        }
+
         // Fungsi Edit Modal
         function editTopingModal(button) {
             const id = button.dataset.id;
@@ -300,6 +325,7 @@
             document.getElementById('name_edit').value = button.dataset.name;
             document.getElementById('category_edit').value = button.dataset.category;
             document.getElementById('price_edit').value = button.dataset.price;
+            document.getElementById('price_buy_edit').value = button.dataset.priceBuy;
             document.getElementById('stock_edit').value = button.dataset.stock;
 
             // Set gambar saat ini
