@@ -54,7 +54,7 @@
                                             </span>
                                         </button>
                                     </td>
-                                    <td class="px-6 py-4 space-x-2">
+                                    <td class="px-6 py-4 space-x-2 flex items-center">
                                         <button onclick="editProviderModal(this)"
                                             data-id="{{ $provider->id }}"
                                             data-name="{{ $provider->name }}"
@@ -62,13 +62,13 @@
                                             data-account_name="{{ $provider->account_name }}"
                                             data-type="{{ $provider->type }}"
                                             data-instructions="{{ $provider->instructions }}"
-                                            class="bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-md text-white shadow">
-                                            ✏️ Edit
+                                            data-logo="{{ $provider->logo }}"
+                                            class="edit-button">
+                                            ✏️
                                         </button>
-                                        
                                         <button onclick="confirmDelete('{{ $provider->id }}')"
-                                            class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md text-white shadow">
-                                            🗑️ Hapus
+                                            class="delete-button">
+                                            🗑️
                                         </button>
                                     </td>
                                 </tr>
@@ -92,7 +92,7 @@
             <div class="flex items-start justify-between p-6 border-b-2 border-blue-600">
                 <h3 class="text-xl font-semibold text-blue-600">➕ Tambah Provider Baru</h3>
                 <button onclick="toggleModal('createProviderModal')"
-                    class="text-blue-600 hover:text-blue-800 text-2xl">&times;</button>
+                    class="text-blue-600 hover:text-blue-800 text-2xl">×</button>
             </div>
             <form id="createProviderForm" action="{{ route('payment_providers.store') }}" method="POST" class="p-6" enctype="multipart/form-data">
                 @csrf
@@ -167,7 +167,7 @@
             <div class="flex items-start justify-between p-6 border-b-2 border-blue-600">
                 <h3 class="text-xl font-semibold text-blue-600" id="edit_title">✏️ Update Provider</h3>
                 <button onclick="toggleModal('editProviderModal')"
-                    class="text-blue-600 hover:text-blue-800 text-2xl">&times;</button>
+                    class="text-blue-600 hover:text-blue-800 text-2xl">×</button>
             </div>
             <form id="editProviderForm" method="POST" class="p-6" enctype="multipart/form-data">
                 @csrf
@@ -238,6 +238,58 @@
         </div>
     </div>
 
+    <style>
+        /* Tombol Edit */
+        .edit-button {
+            background: transparent; /* Menghapus latar belakang */
+            border: 2px solid #FFC107; /* Stroke kuning (amber-500) */
+            color: #FFC107; /* Warna ikon dan teks kuning */
+            padding: 2px 4px; /* Sesuaikan padding */
+            border-radius: 4px; /* Sudut membulat */
+            font-size: 0.75rem; /* text-xs */
+            box-shadow: none; /* Menghapus shadow */
+            transition: border-color 0.3s ease, color 0.3s ease; /* Transisi untuk hover */
+            display: flex; /* Mengatur ikon dan teks sejajar */
+            align-items: center; /* Vertikal rata tengah */
+            gap: 4px; /* Jarak antara ikon dan teks */
+        }
+
+        .edit-button:hover {
+            border-color: #D4A017; /* Kuning lebih gelap saat hover (amber-600) */
+            color: #D4A017; /* Ikon dan teks mengikuti warna hover */
+            background: transparent; /* Pastikan tetap transparan */
+        }
+
+        /* Tombol Hapus */
+        .delete-button {
+            background: transparent; /* Menghapus latar belakang */
+            border: 2px solid #DC2626; /* Stroke merah (red-600) */
+            color: #DC2626; /* Warna ikon dan teks merah */
+            padding: 2px 4px; /* Sesuaikan padding */
+            border-radius: 4px; /* Sudut membulat */
+            font-size: 0.75rem; /* text-xs */
+            box-shadow: none; /* Menghapus shadow */
+            transition: border-color 0.3s ease, color 0.3s ease; /* Transisi untuk hover */
+            display: flex; /* Mengatur ikon dan teks sejajar */
+            align-items: center; /* Vertikal rata tengah */
+            gap: 4px; /* Jarak antara ikon dan teks */
+        }
+
+        .delete-button:hover {
+            border-color: #B91C1C; /* Merah lebih gelap saat hover (red-700) */
+            color: #B91C1C; /* Ikon dan teks mengikuti warna hover */
+            background: transparent; /* Pastikan tetap transparan */
+        }
+
+        @media (min-width: 768px) {
+            .edit-button,
+            .delete-button {
+                padding: 8px 16px; /* md:px-4 md:py-2 */
+                font-size: 0.875rem; /* md:text-sm */
+            }
+        }
+    </style>
+
     <script>
         // Fungsi Toggle Modal
         function toggleModal(modalId) {
@@ -263,7 +315,7 @@
             const logoPath = button.dataset.logo;
             
             if(logoPath) {
-                currentLogo.src = `{{ asset('storage/') }}/${logoPath}`;
+                currentLogo.src = `{{ asset('') }}${logoPath}`; // Menggunakan asset tanpa 'storage/' karena logo sudah menggunakan path publik
                 logoContainer.classList.remove('hidden');
             } else {
                 logoContainer.classList.add('hidden');

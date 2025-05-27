@@ -49,16 +49,16 @@
                                         <td class="px-6 py-4 space-x-2">
                                             <button
                                                 onclick="openEditModal('{{ $table->id }}', '{{ $table->number }}', '{{ $table->status }}')"
-                                                class="bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-md text-sm text-white shadow">
-                                                ✏️ Edit
+                                                class="edit-button">
+                                                ✏️
                                             </button>
                                             <button onclick="setAvailable('{{ $table->id }}')"
-                                                class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-md text-sm text-white shadow">
-                                                ✅ Available
+                                                class="available-button">
+                                                ✅
                                             </button>
                                             <button onclick="deleteTable('{{ $table->id }}')"
-                                                class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md text-sm text-white shadow">
-                                                🗑️ Hapus
+                                                class="delete-button">
+                                                🗑️
                                             </button>
                                         </td>
                                     </tr>
@@ -103,6 +103,68 @@
             </form>
         </div>
     </div>
+
+    <style>
+        /* Tombol Edit */
+        .edit-button {
+            background: transparent; /* Menghapus latar belakang */
+            border: 2px solid yellow; /* Stroke hitam */
+            color: black; /* Warna ikon menjadi hitam */
+            padding: 2px 4px; /* Sesuaikan padding */
+            border-radius: 4px; /* Sudut membulat */
+            font-size: 0.75rem; /* text-xs */
+            box-shadow: none; /* Menghapus shadow */
+            transition: border-color 0.3s ease; /* Transisi untuk hover */
+        }
+
+        .edit-button:hover {
+            border-color: #555; /* Warna border saat hover */
+            background: transparent; /* Pastikan tetap transparan saat hover */
+        }
+
+        /* Tombol Available */
+        .available-button {
+            background: transparent; /* Menghapus latar belakang */
+            border: 2px solid green; /* Stroke hitam */
+            color: black; /* Warna ikon menjadi hitam */
+            padding: 2px 4px; /* Sesuaikan padding */
+            border-radius: 4px; /* Sudut membulat */
+            font-size: 0.75rem; /* text-xs */
+            box-shadow: none; /* Menghapus shadow */
+            transition: border-color 0.3s ease; /* Transisi untuk hover */
+        }
+
+        .available-button:hover {
+            border-color: #555; /* Warna border saat hover */
+            background: transparent; /* Pastikan tetap transparan saat hover */
+        }
+
+        /* Tombol Hapus */
+        .delete-button {
+            background: transparent; /* Menghapus latar belakang */
+            border: 2px solid red; /* Stroke hitam */
+            color: black; /* Warna ikon menjadi hitam */
+            padding: 2px 4px; /* Sesuaikan padding */
+            border-radius: 4px; /* Sudut membulat */
+            font-size: 0.75rem; /* text-xs */
+            box-shadow: none; /* Menghapus shadow */
+            transition: border-color 0.3s ease; /* Transisi untuk hover */
+        }
+
+        .delete-button:hover {
+            border-color: #555; /* Warna border saat hover */
+            background: transparent; /* Pastikan tetap transparan saat hover */
+        }
+
+        @media (min-width: 768px) {
+            .edit-button,
+            .available-button,
+            .delete-button {
+                padding: 8px 16px; /* md:px-4 md:py-2 */
+                font-size: 0.875rem; /* md:text-sm */
+            }
+        }
+    </style>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -252,16 +314,16 @@
                             </td>
                             <td class="px-6 py-4 space-x-2">
                                 <button onclick="openEditModal('${data.table.id}', '${data.table.number}', 'available')"
-                                    class="bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-md text-sm text-white shadow">
-                                    ✏️ Edit
+                                    class="edit-button">
+                                    ✏️
                                 </button>
                                 <button onclick="setAvailable('${data.table.id}')"
-                                    class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-md text-sm text-white shadow">
-                                    ✅ Available
+                                    class="available-button">
+                                    ✅
                                 </button>
                                 <button onclick="deleteTable('${data.table.id}')"
-                                    class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md text-sm text-white shadow">
-                                    🗑️ Hapus
+                                    class="delete-button">
+                                    🗑️
                                 </button>
                             </td>
                         </tr>

@@ -61,7 +61,7 @@
                                         </td>
                                         <td class="px-6 py-4">
                                             @if ($transaction->payment_proof)
-                                                <button onclick="showImageModal('{{ asset( $transaction->payment_proof) }}')"
+                                                <button onclick="showImageModal('{{ asset($transaction->payment_proof) }}')"
                                                     class="inline-block group relative">
                                                     <img src="{{ asset($transaction->payment_proof) }}"
                                                         class="w-16 h-16 object-cover rounded-lg border-2 border-blue-200 transition-transform group-hover:scale-110"
@@ -88,9 +88,9 @@
                                                 {{ strtoupper($transaction->status) }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 space-x-2">
+                                        <td class="px-6 py-4 space-x-2 flex items-center">
                                             <button onclick="processTransaction('{{ $transaction->id }}')"
-                                                class="bg-blue-500 hover:bg-blue-700 px-4 py-2 rounded-md text-white shadow">
+                                                class="process-button">
                                                 🔄 Proses
                                             </button>
                                             <button onclick="editTransactionModal(this)"
@@ -103,11 +103,11 @@
                                                 data-payment_proof="{{ $transaction->payment_proof }}"
                                                 data-bowl_size="{{ $transaction->bowl_size }}"
                                                 data-spiciness_level="{{ $transaction->spiciness_level }}"
-                                                class="bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-md text-white shadow">
+                                                class="edit-button">
                                                 ✏️ Edit
                                             </button>
                                             <button onclick="confirmDelete('{{ $transaction->id }}')"
-                                                class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md text-white shadow">
+                                                class="delete-button">
                                                 🗑️ Hapus
                                             </button>
                                         </td>
@@ -372,6 +372,128 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <style>
+        /* Tombol Proses */
+        .process-button {
+            background: transparent; /* Menghapus latar belakang */
+            border: 2px solid #3B82F6; /* Stroke biru (blue-500) */
+            color: #3B82F6; /* Warna ikon dan teks biru */
+            padding: 2px 4px; /* Sesuaikan padding */
+            border-radius: 4px; /* Sudut membulat */
+            font-size: 0.75rem; /* text-xs */
+            box-shadow: none; /* Menghapus shadow */
+            transition: border-color 0.3s ease, color 0.3s ease; /* Transisi untuk hover */
+            display: flex; /* Mengatur ikon dan teks sejajar */
+            align-items: center; /* Vertikal rata tengah */
+            gap: 4px; /* Jarak antara ikon dan teks */
+        }
+
+        .process-button:hover {
+            border-color: #2563EB; /* Biru lebih gelap saat hover (blue-600) */
+            color: #2563EB; /* Ikon dan teks mengikuti warna hover */
+            background: transparent; /* Pastikan tetap transparan */
+        }
+
+        /* Tombol Edit */
+        .edit-button {
+            background: transparent; /* Menghapus latar belakang */
+            border: 2px solid #FFC107; /* Stroke kuning (amber-500) */
+            color: #FFC107; /* Warna ikon dan teks kuning */
+            padding: 2px 4px; /* Sesuaikan padding */
+            border-radius: 4px; /* Sudut membulat */
+            font-size: 0.75rem; /* text-xs */
+            box-shadow: none; /* Menghapus shadow */
+            transition: border-color 0.3s ease, color 0.3s ease; /* Transisi untuk hover */
+            display: flex; /* Mengatur ikon dan teks sejajar */
+            align-items: center; /* Vertikal rata tengah */
+            gap: 4px; /* Jarak antara ikon dan teks */
+        }
+
+        .edit-button:hover {
+            border-color: #D4A017; /* Kuning lebih gelap saat hover (amber-600) */
+            color: #D4A017; /* Ikon dan teks mengikuti warna hover */
+            background: transparent; /* Pastikan tetap transparan */
+        }
+
+        /* Tombol Hapus */
+        .delete-button {
+            background: transparent; /* Menghapus latar belakang */
+            border: 2px solid #DC2626; /* Stroke merah (red-600) */
+            color: #DC2626; /* Warna ikon dan teks merah */
+            padding: 2px 4px; /* Sesuaikan padding */
+            border-radius: 4px; /* Sudut membulat */
+            font-size: 0.75rem; /* text-xs */
+            box-shadow: none; /* Menghapus shadow */
+            transition: border-color 0.3s ease, color 0.3s ease; /* Transisi untuk hover */
+            display: flex; /* Mengatur ikon dan teks sejajar */
+            align-items: center; /* Vertikal rata tengah */
+            gap: 4px; /* Jarak antara ikon dan teks */
+        }
+
+        .delete-button:hover {
+            border-color: #B91C1C; /* Merah lebih gelap saat hover (red-700) */
+            color: #B91C1C; /* Ikon dan teks mengikuti warna hover */
+            background: transparent; /* Pastikan tetap transparan */
+        }
+
+        @media (min-width: 768px) {
+            .process-button,
+            .edit-button,
+            .delete-button {
+                padding: 8px 16px; /* md:px-4 md:py-2 */
+                font-size: 0.875rem; /* md:text-sm */
+            }
+        }
+
+        /* Styling tambahan untuk modal dan elemen lainnya */
+        .modal-scrollable {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .modal-scrollable::-webkit-scrollbar {
+            display: none;
+        }
+
+        .modal-transition {
+            transition: opacity 0.3s ease;
+        }
+
+        .proof-transition {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .modal-overlay {
+            z-index: 9998;
+        }
+
+        .modal-content {
+            z-index: 9999;
+        }
+
+        .capitalize {
+            text-transform: capitalize;
+        }
+
+        #imageModal {
+            backdrop-filter: blur(5px);
+        }
+
+        #imageModal img {
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (min-width: 768px) {
+            #modalImage {
+                max-height: 80vh;
+            }
+        }
+
+        #modalImage:hover {
+            transform: scale(1.02);
+        }
+    </style>
+
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.plugin(AlpineCollapse);
@@ -558,53 +680,4 @@
             }
         };
     </script>
-
-    <style>
-        .modal-scrollable {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        .modal-scrollable::-webkit-scrollbar {
-            display: none;
-        }
-
-        .modal-transition {
-            transition: opacity 0.3s ease;
-        }
-
-        .proof-transition {
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-
-        .modal-overlay {
-            z-index: 9998;
-        }
-
-        .modal-content {
-            z-index: 9999;
-        }
-
-        .capitalize {
-            text-transform: capitalize;
-        }
-
-        #imageModal {
-            backdrop-filter: blur(5px);
-        }
-
-        #imageModal img {
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
-        }
-
-        @media (min-width: 768px) {
-            #modalImage {
-                max-height: 80vh;
-            }
-        }
-
-        #modalImage:hover {
-            transform: scale(1.02);
-        }
-    </style>
 </x-app-layout>

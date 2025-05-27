@@ -74,16 +74,16 @@
                                                 data-price="{{ $toping->price }}" data-price-buy="{{ $toping->price_buy }}"
                                                 data-stock="{{ $toping->stock }}" data-image="{{ $toping->image }}"
                                                 onclick="editTopingModal(this)"
-                                                class="bg-amber-500 hover:bg-amber-600 px-2 py-1 md:px-4 md:py-2 rounded-md text-xs md:text-sm text-white shadow">
-                                                ✏️ Edit
+                                                class="edit-button">
+                                                ✏️
                                             </button>
                                             <form action="{{ route('toping.destroy', $toping->id) }}" method="POST"
                                                 class="delete-form" data-stock="{{ $toping->stock }}">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                    class="bg-red-500 hover:bg-red-600 px-2 py-1 md:px-4 md:py-2 rounded-md text-xs md:text-sm text-white shadow">
-                                                    🗑️ Hapus
+                                                    class="delete-button">
+                                                    🗑️
                                                 </button>
                                             </form>
                                         </td>
@@ -268,6 +268,58 @@
             </form>
         </div>
     </div>
+
+    <style>
+        /* Tombol Edit */
+        .edit-button {
+            background: transparent; /* Menghapus latar belakang */
+            border: 2px solid #FFC107; /* Stroke kuning (amber-500) */
+            color: #FFC107; /* Warna ikon dan teks kuning */
+            padding: 2px 4px; /* Sesuaikan padding */
+            border-radius: 4px; /* Sudut membulat */
+            font-size: 0.75rem; /* text-xs */
+            box-shadow: none; /* Menghapus shadow */
+            transition: border-color 0.3s ease; /* Transisi untuk hover */
+            display: flex; /* Mengatur ikon dan teks sejajar */
+            align-items: center; /* Vertikal rata tengah */
+            gap: 4px; /* Jarak antara ikon dan teks */
+        }
+
+        .edit-button:hover {
+            border-color: #D4A017; /* Kuning lebih gelap saat hover (amber-600) */
+            background: transparent; /* Pastikan tetap transparan saat hover */
+            color: #D4A017; /* Ikon dan teks mengikuti warna hover */
+        }
+
+        /* Tombol Hapus */
+        .delete-button {
+            background: transparent; /* Menghapus latar belakang */
+            border: 2px solid #DC2626; /* Stroke merah (red-600) */
+            color: #DC2626; /* Warna ikon dan teks merah */
+            padding: 2px 4px; /* Sesuaikan padding */
+            border-radius: 4px; /* Sudut membulat */
+            font-size: 0.75rem; /* text-xs */
+            box-shadow: none; /* Menghapus shadow */
+            transition: border-color 0.3s ease; /* Transisi untuk hover */
+            display: flex; /* Mengatur ikon dan teks sejajar */
+            align-items: center; /* Vertikal rata tengah */
+            gap: 4px; /* Jarak antara ikon dan teks */
+        }
+
+        .delete-button:hover {
+            border-color: #B91C1C; /* Merah lebih gelap saat hover (red-700) */
+            background: transparent; /* Pastikan tetap transparan saat hover */
+            color: #B91C1C; /* Ikon dan teks mengikuti warna hover */
+        }
+
+        @media (min-width: 768px) {
+            .edit-button,
+            .delete-button {
+                padding: 8px 16px; /* md:px-4 md:py-2 */
+                font-size: 0.875rem; /* md:text-sm */
+            }
+        }
+    </style>
 
     <script>
         // Fungsi Toggle Modal

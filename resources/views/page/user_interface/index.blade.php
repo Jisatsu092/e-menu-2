@@ -473,8 +473,29 @@
                     <div class="flex justify-between items-center mb-4 pb-2 border-b">
                         <h3 class="text-lg font-bold">Keranjang Belanja</h3>
                         <div class="flex items-center space-x-4">
-                            <button onclick="addNewPerson()" class="text-blue-500 text-sm">Tambah Menu</button>
-                            <button onclick="clearCart()" class="text-red-500 text-sm">Hapus Semua</button>
+                            <!-- Tombol Tambah Menu -->
+                            <button onclick="addNewPerson()" aria-label="Tambah Menu" class="p-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                            </button>
+
+                            <!-- Tombol Hapus Semua -->
+                            <button onclick="clearCart()" aria-label="Hapus Semua" class="p-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" class="text-red-500">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path
+                                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                    </path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                                </svg>
+                            </button>
                             <button onclick="toggleMobileCart()" class="text-gray-500 hover:text-gray-700">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -524,9 +545,35 @@
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-lg font-bold">Keranjang</h3>
                                 <div class="flex items-center space-x-4">
-                                    <button onclick="addNewPerson()" class="text-blue-500 text-sm">Tambah
-                                        Menu</button>
-                                    <button onclick="clearCart()" class="text-red-500 text-sm">Hapus Semua</button>
+                                    <!-- Tombol Tambah Menu -->
+                                    <button onclick="addNewPerson()" aria-label="Tambah Menu" class="p-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            class="text-blue-500">
+                                            <line x1="12" y1="5" x2="12" y2="19">
+                                            </line>
+                                            <line x1="5" y1="12" x2="19" y2="12">
+                                            </line>
+                                        </svg>
+                                    </button>
+
+                                    <!-- Tombol Hapus Semua -->
+                                    <button onclick="clearCart()" aria-label="Hapus Semua" class="p-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                            class="text-red-500">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path
+                                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                            </path>
+                                            <line x1="10" y1="11" x2="10" y2="17">
+                                            </line>
+                                            <line x1="14" y1="11" x2="14" y2="17">
+                                            </line>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                             <div id="cartItems" class="space-y-3 max-h-60 overflow-y-auto"></div>
@@ -700,26 +747,26 @@
                     </div>
                     <div class="space-y-3">
                         ${cart[currentPersonIndex].items.length > 0 ? cart[currentPersonIndex].items.map(item => `
-                                                                    <div class="flex justify-between items-start bg-gray-50 rounded-lg p-3">
-                                                                        <div class="flex-1">
-                                                                            <p class="font-medium text-sm">${item.name}</p>
-                                                                            <div class="flex items-center space-x-2 mt-1">
-                                                                                <button onclick="updateQuantity('${item.id}', -1, ${item.price})" 
-                                                                                    class="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg text-xs">−</button>
-                                                                                <span class="text-sm font-medium">${item.quantity}</span>
-                                                                                <button onclick="updateQuantity('${item.id}', 1, ${item.price})" 
-                                                                                    class="bg-red-500 text-white px-2 py-1 rounded-lg text-xs">+</button>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="text-right">
-                                                                            <p class="text-sm font-medium text-red-500">
-                                                                                Rp${(item.price * item.quantity).toLocaleString('id-ID')}
-                                                                            </p>
-                                                                            <button onclick="removeItem('${item.id}')" 
-                                                                                class="text-gray-400 hover:text-red-500 text-xs mt-1">Hapus</button>
-                                                                        </div>
-                                                                    </div>
-                                                                `).join('') : '<p class="text-sm text-gray-500">Belum ada item</p>'}
+                                                                                    <div class="flex justify-between items-start bg-gray-50 rounded-lg p-3">
+                                                                                        <div class="flex-1">
+                                                                                            <p class="font-medium text-sm">${item.name}</p>
+                                                                                            <div class="flex items-center space-x-2 mt-1">
+                                                                                                <button onclick="updateQuantity('${item.id}', -1, ${item.price})" 
+                                                                                                    class="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg text-xs">−</button>
+                                                                                                <span class="text-sm font-medium">${item.quantity}</span>
+                                                                                                <button onclick="updateQuantity('${item.id}', 1, ${item.price})" 
+                                                                                                    class="bg-red-500 text-white px-2 py-1 rounded-lg text-xs">+</button>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="text-right">
+                                                                                            <p class="text-sm font-medium text-red-500">
+                                                                                                Rp${(item.price * item.quantity).toLocaleString('id-ID')}
+                                                                                            </p>
+                                                                                            <button onclick="removeItem('${item.id}')" 
+                                                                                                class="text-gray-400 hover:text-red-500 text-xs mt-1">Hapus</button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                `).join('') : '<p class="text-sm text-gray-500">Belum ada item</p>'}
                     </div>
                 `;
 
