@@ -24,6 +24,7 @@
                         <h2 class="text-2xl font-bold text-gray-800">Daftar Detail Transaksi</h2>
                         
                         <!-- Filter and Actions -->
+                        @can('role-A')
                         <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto">
                             <form action="{{ route('transaction_details.index') }}" method="GET" class="flex flex-col sm:flex-row gap-2">
                                 <input type="date" name="start_date" value="{{ request('start_date') }}" class="rounded border-gray-300">
@@ -38,7 +39,7 @@
                                 Cetak Laporan
                             </a>
                             
-                            @can('role-A')
+                            
                             <form action="{{ route('transaction_details.destroyAll') }}" method="POST">
                                 @csrf @method('DELETE')
                                 <button type="submit" onclick="return confirm('Yakin hapus semua data?')" 
@@ -60,7 +61,7 @@
                         <div class="hidden md:block">
                             @foreach($details as $transactionId => $items)
                             @php
-                                $transaction = $items->first()->transaction;
+                                $transaction = $items->first()->transaction ?? null;
                                 $total = $items->sum('subtotal');
                             @endphp
                             
@@ -68,8 +69,8 @@
                                 <summary class="bg-gray-100 p-4 cursor-pointer flex justify-between items-center">
                                     <div class="flex items-center gap-4">
                                         <span class="font-semibold">#{{ $transaction->code ?? 'N/A' }}</span>
-                                        <span class="status-badge status-{{ $transaction->status }}">
-                                            {{ ucfirst($transaction->status) }}
+                                        <span class="status-badge status-{{ $transaction->status ?? 'unknown' }}">
+                                            {{ ucfirst($transaction->status ?? 'Unknown') }}
                                         </span>
                                         <span class="text-sm text-gray-600">
                                             {{ $items->count() }} Item | Total: Rp{{ number_format($total, 0, ',', '.') }}
@@ -89,9 +90,9 @@
                                     @foreach($items as $item)
                                     <div class="grid grid-cols-12 gap-4 py-2 border-t text-sm">
                                         <div class="col-span-5">{{ $item->toping->name ?? '-' }}</div>
-                                        <div class="col-span-2">{{ $item->quantity }}</div>
-                                        <div class="col-span-3">Rp{{ number_format($item->subtotal, 0, ',', '.') }}</div>
-                                        <div class="col-span-2">{{ $transaction->created_at->format('d/m/Y') }}</div>
+                                        <div class="col-span-2">{{ $item->quantity ?? 0 }}</div>
+                                        <div class="col-span-3">Rp{{ number_format($item->subtotal ?? 0, 0, ',', '.') }}</div>
+                                        <div class="col-span-2">{{ $transaction ? $transaction->created_at->format('d/m/Y') : '-' }}</div>
                                     </div>
                                     @endforeach
                                 </div>
@@ -103,7 +104,7 @@
                         <div class="md:hidden space-y-4">
                             @foreach($details as $transactionId => $items)
                             @php
-                                $transaction = $items->first()->transaction;
+                                $transaction = $items->first()->transaction ?? null;
                                 $total = $items->sum('subtotal');
                             @endphp
                             
@@ -112,8 +113,8 @@
                                     <div>
                                         <div class="font-semibold">#{{ $transaction->code ?? 'N/A' }}</div>
                                         <div class="text-sm text-gray-600 mt-1 flex gap-2 items-center">
-                                            <span class="status-badge status-{{ $transaction->status }}">
-                                                {{ ucfirst($transaction->status) }}
+                                            <span class="status-badge status-{{ $transaction->status ?? 'unknown' }}">
+                                                {{ ucfirst($transaction->status ?? 'Unknown') }}
                                             </span>
                                             <span>{{ $items->count() }} Item | Rp{{ number_format($total, 0, ',', '.') }}</span>
                                         </div>
@@ -126,13 +127,13 @@
                                     <div class="p-3 bg-gray-50 rounded-lg">
                                         <p class="font-medium">{{ $item->toping->name ?? '-' }}</p>
                                         <div class="flex justify-between text-sm mt-1">
-                                            <span>Qty: {{ $item->quantity }}</span>
+                                            <span>Qty: {{ $item->quantity ?? 0 }}</span>
                                             <span class="text-green-600">
-                                                Rp{{ number_format($item->subtotal, 0, ',', '.') }}
+                                                Rp{{ number_format($item->subtotal ?? 0, 0, ',', '.') }}
                                             </span>
                                         </div>
                                         <div class="text-sm text-gray-600 mt-1">
-                                            Tanggal: {{ $transaction->created_at->format('d/m/Y') }}
+                                            Tanggal: {{ $transaction ? $transaction->created_at->format('d/m/Y') : '-' }}
                                         </div>
                                     </div>
                                     @endforeach
@@ -152,7 +153,6 @@
     </div>
 
     <script>
-        // Rotasi panah saat details dibuka
         document.querySelectorAll('details').forEach(detail => {
             detail.addEventListener('toggle', () => {
                 detail.classList.toggle('details-open', detail.open);

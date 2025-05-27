@@ -161,14 +161,9 @@
         </div>
         <div class="p-4 space-y-4">
             <!-- Mobile Menu Items -->
-            <button @click="window.location.href='{{ route('beranda') }}'" 
-                    class="w-full px-4 py-3 rounded-md hover:bg-gray-100 transition">
-                Beranda
-            </button>
-
             <div class="space-y-2">
                 <a href="{{ route('userInterface.index') }}" class="block px-4 py-3 hover:bg-gray-100 transition">Menu</a>
-                <a href="{{ route('transaction_details.index') }}" class="block px-4 py-3 hover:bg-gray-100 transition">Keranjang</a>
+                <a href="{{ route('transaction_details.index') }}" class="block px-4 py-3 hover:bg-gray-100 transition">Riwayat Transaksi</a>
             </div>
 
             <!-- Mobile Profile Section -->
