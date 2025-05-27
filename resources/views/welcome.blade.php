@@ -41,7 +41,7 @@
             </div>
 
             @auth
-                <a href="{{ url('/beranda') }}" class="bg-red-500 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors">
+                <a href="{{ url('/user_interface') }}" class="bg-red-500 hover:bg-red-700 px-4 py-2 rounded-lg transition-colors">
                     Dashboard
                 </a>
             @else
