@@ -17,42 +17,60 @@ class userInterfaceController extends Controller
 {
     public function index()
     {
-        $topings = Toping::all();
-        $paymentProviders = PaymentProvider::all();
-        $categories = Category::all();
-        $tables = Table::select('id', 'number', 'status', 'occupied_at')->orderBy('number')->get();
-        return view('page.user_interface.index', [
-            'topings' => $topings,
-            'categories' => $categories,
-            'tables' => $tables,
-            'paymentProviders' => $paymentProviders
-        ]);
+        try {
+            $topings = Toping::all();
+            $paymentProviders = PaymentProvider::all();
+            $categories = Category::all();
+            $tables = Table::select('id', 'number', 'status', 'occupied_at')->orderBy('number')->get();
+            return view('page.user_interface.index', [
+                'topings' => $topings,
+                'categories' => $categories,
+                'tables' => $tables,
+                'paymentProviders' => $paymentProviders
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('error.index')
+                ->with('error_message', 'Error: ' . $e->getMessage());
+        }
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'table_id' => 'required|exists:tables,id',
-        ]);
+        try {
+            $request->validate([
+                'table_id' => 'required|exists:tables,id',
+            ]);
 
-        $table = Table::findOrFail($request->table_id);
-        $table->update([
-            'status' => 'occupied',
-            'occupied_at' => now()
-        ]);
+            $table = Table::findOrFail($request->table_id);
+            $table->update([
+                'status' => 'occupied',
+                'occupied_at' => now()
+            ]);
 
-        return response()->json(['success' => true, 'message' => 'Table status updated']);
+            return response()->json(['success' => true, 'message' => 'Table status updated']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+                'message' => 'Validasi gagal'
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function confirmPayment(Request $request)
     {
-        $request->validate([
-            'payment_proof' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'provider_id' => 'required|exists:payment_providers,id',
-            'order_data' => 'required|json',
-        ]);
-
         try {
+            $request->validate([
+                'payment_proof' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                'provider_id' => 'required|exists:payment_providers,id',
+                'order_data' => 'required|json',
+            ]);
+
             DB::beginTransaction();
 
             // Parse order data
@@ -121,18 +139,18 @@ class userInterfaceController extends Controller
                 if (!file_exists(public_path('payment_proofs'))) {
                     mkdir(public_path('payment_proofs'), 0755, true);
                 }
-    
+
                 // Hapus payment proof lama jika ada
                 if ($transaction->payment_proof && file_exists(public_path($transaction->payment_proof))) {
                     unlink(public_path($transaction->payment_proof));
                 }
-    
+
                 // Simpan payment proof baru
                 $proof = $request->file('payment_proof');
                 $proofName = time() . '_' . $proof->getClientOriginalName();
                 $proofPath = 'payment_proofs/' . $proofName;
                 $proof->move(public_path('payment_proofs'), $proofName);
-    
+
                 $transaction->update(['payment_proof' => $proofPath]);
             }
 
@@ -143,11 +161,18 @@ class userInterfaceController extends Controller
                 'transactionId' => $transaction->id,
                 'status' => $transaction->status
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+                'message' => 'Validasi gagal'
+            ], 422);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Error processing payment: ' . $e->getMessage()
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -172,6 +197,40 @@ class userInterfaceController extends Controller
                 'success' => false,
                 'message' => 'Error: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    // Endpoint untuk mendapatkan status tabel
+    public function getTables()
+    {
+        try {
+            $tables = Table::select('id', 'number', 'status', 'occupied_at')->orderBy('number')->get();
+            return response()->json($tables);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error fetching tables: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // Endpoint untuk mendapatkan status transaksi
+    public function getTransactionStatus($transactionId)
+    {
+        try {
+            $transaction = Transaction::findOrFail($transactionId);
+            return response()->json(['status' => $transaction->status]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error fetching status: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // Endpoint untuk print transaksi
+    public function printTransaction($transactionId)
+    {
+        try {
+            $transaction = Transaction::with('details.toping', 'table', 'paymentProvider', 'user')->findOrFail($transactionId);
+            $html = view('transactions.print', compact('transaction'))->render();
+            return response($html)->header('Content-Type', 'text/html');
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error generating print: ' . $e->getMessage()], 500);
         }
     }
 }

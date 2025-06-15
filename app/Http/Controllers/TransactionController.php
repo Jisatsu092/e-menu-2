@@ -72,7 +72,6 @@ class TransactionController extends Controller
                 'payment_proof' => 'required|image|mimes:jpeg,png,jpg|max:2048'
             ]);
 
-            // Cek status meja
             $table = Table::findOrFail($validated['table_id']);
             if ($table->status === 'occupied') {
                 return response()->json([
@@ -81,10 +80,8 @@ class TransactionController extends Controller
                 ], 400);
             }
 
-            // Simpan file ke storage
             $proofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
 
-            // Buat transaksi dengan path relatif
             $transaction = Transaction::create([
                 'user_id' => $validated['user_id'],
                 'table_id' => $validated['table_id'],
@@ -96,7 +93,6 @@ class TransactionController extends Controller
                 'payment_proof' => $proofPath
             ]);
 
-            // Update status meja setelah transaksi berhasil dibuat
             $table->update(['status' => 'occupied']);
 
             return response()->json([
@@ -144,18 +140,18 @@ class TransactionController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'table_id' => 'required|exists:tables,id',
-            'total_price' => 'required|numeric|min:0',
-            'status' => 'required|in:pending,paid,cancelled,proses',
-            'payment_provider_id' => 'required|exists:payment_providers,id',
-            'spiciness_level' => 'required|in:mild,medium,hot,extreme',
-            'payment_proof' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'bowl_size' => 'required|in:small,medium,large',
-        ]);
-
-        DB::beginTransaction();
         try {
+            $request->validate([
+                'table_id' => 'required|exists:tables,id',
+                'total_price' => 'required|numeric|min:0',
+                'status' => 'required|in:pending,paid,cancelled,proses',
+                'payment_provider_id' => 'required|exists:payment_providers,id',
+                'spiciness_level' => 'required|in:mild,medium,hot,extreme',
+                'payment_proof' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'bowl_size' => 'required|in:small,medium,large',
+            ]);
+
+            DB::beginTransaction();
             $transaction = Transaction::findOrFail($id);
             $data = $request->all();
 
@@ -166,7 +162,6 @@ class TransactionController extends Controller
                 $data['payment_proof'] = $request->file('payment_proof')->store('payment_proofs', 'public');
             }
 
-            // Perubahan logika status meja
             if ($request->status !== $transaction->status) {
                 $newStatus = ($request->status === 'cancelled') ? 'available' : 'occupied';
                 $transaction->table->update(['status' => $newStatus]);
@@ -179,18 +174,17 @@ class TransactionController extends Controller
                 ->with('message_insert', 'Transaksi berhasil diperbarui');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('transaction.index')
-                ->with('error', 'Gagal memperbarui transaksi: ' . $e->getMessage());
+            return redirect()->route('error.index')
+                ->with('error_message', 'Error: ' . $e->getMessage());
         }
     }
 
     public function destroy($id)
     {
-        DB::beginTransaction();
-        try { 
+        try {
+            DB::beginTransaction();
             $transaction = Transaction::findOrFail($id);
 
-            // Hapus file payment proof
             if ($transaction->payment_proof) {
                 Storage::disk('public')->delete($transaction->payment_proof);
             }
@@ -210,34 +204,41 @@ class TransactionController extends Controller
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message_delete' => 'Transaksi tidak ditemukan'
+                'message' => 'Error: Transaksi tidak ditemukan'
             ], 404);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'error_message' => 'Gagal menghapus transaksi: ' . $e->getMessage()
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }
 
     public function process(Request $request, $id)
     {
-        $transaction = Transaction::findOrFail($id);
-        $transaction->update(['status' => 'proses']);
+        try {
+            $transaction = Transaction::findOrFail($id);
+            $transaction->update(['status' => 'proses']);
 
-        return response()->json(['success' => 'Status updated to Proses']);
+            return response()->json(['success' => true, 'message' => 'Status updated to Proses']);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     public function confirmPayment(Request $request)
     {
-        $request->validate([
-            'payment_proof' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'order_data' => 'required'
-        ]);
-
-        DB::beginTransaction();
         try {
+            $request->validate([
+                'payment_proof' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+                'order_data' => 'required'
+            ]);
+
+            DB::beginTransaction();
             $orderData = json_decode($request->order_data);
 
             if (!isset($orderData->bowl_size)) {
@@ -257,31 +258,27 @@ class TransactionController extends Controller
                 'status' => 'paid'
             ]);
 
-            // Set meja ke 'occupied' karena transaksi baru dibuat
             $transaction->table->update(['status' => 'occupied']);
 
             DB::commit();
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
     }
 
     public function report(Request $request)
     {
         try {
-            // Handle date filter
-            $startDate = $request->start ? Carbon::parse($request->start) : null;
+            $startDate = $request->start ? Carbon::parse($request->start)->startOfDay() : null;
             $endDate = $request->end ? Carbon::parse($request->end)->endOfDay() : null;
 
-            $transactions = Transaction::where('status', '!=', 'cancelled')
-        ->when($request->start, fn($query) => $query->whereDate('created_at', '>=', $request->start))
-        ->when($request->end, fn($query) => $query->whereDate('created_at', '<=', $request->end))
-        ->with(['user', 'table'])
-        ->get();
-
             $query = Transaction::with(['user', 'table', 'paymentProvider'])
+                ->where('status', '!=', 'cancelled')
                 ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
                     return $q->whereBetween('created_at', [$startDate, $endDate]);
                 })
@@ -298,7 +295,6 @@ class TransactionController extends Controller
                 })
                 ->orderBy('created_at', 'desc');
 
-            // Get min-max dates
             $minDate = Transaction::oldest('created_at')->value('created_at') ?? now();
             $maxDate = Transaction::latest('created_at')->value('created_at') ?? now();
 
@@ -311,54 +307,77 @@ class TransactionController extends Controller
                 'request' => $request
             ]);
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['error' => 'Gagal memuat laporan: ' . $e->getMessage()]);
+            return redirect()->route('error.index')
+                ->with('error_message', 'Error: ' . $e->getMessage());
         }
     }
+
     public function printAll(Request $request)
     {
-        $query = Transaction::with(['user', 'table', 'paymentProvider'])
-            ->when($request->start && $request->end, function ($q) use ($request) {
-                $start = Carbon::parse($request->start)->startOfDay();
-                $end = Carbon::parse($request->end)->endOfDay();
-                return $q->whereBetween('created_at', [$start, $end]);
-            });
+        try {
+            $query = Transaction::with(['user', 'table', 'paymentProvider'])
+                ->when($request->start && $request->end, function ($q) use ($request) {
+                    $start = Carbon::parse($request->start)->startOfDay();
+                    $end = Carbon::parse($request->end)->endOfDay();
+                    return $q->whereBetween('created_at', [$start, $end]);
+                });
 
-        $transactions = $query->get();
+            $transactions = $query->get();
 
-        return view('page.transaction.print-all', compact('transactions'));
+            return view('page.transaction.print-all', compact('transactions'));
+        } catch (\Exception $e) {
+            return redirect()->route('error.index')
+                ->with('error_message', 'Error: ' . $e->getMessage());
+        }
     }
 
     public function print($id)
     {
-        $transaction = Transaction::with([
-            'details.toping',
-            'user',
-            'table',
-            'paymentProvider'
-        ])->findOrFail($id);
+        try {
+            $transaction = Transaction::with([
+                'details.toping',
+                'user',
+                'table',
+                'paymentProvider'
+            ])->findOrFail($id);
 
-        return view('page.transaction.print', compact('transaction'));
+            return view('page.transaction.print', compact('transaction'));
+        } catch (\Exception $e) {
+            return redirect()->route('error.index')
+                ->with('error_message', 'Error: ' . $e->getMessage());
+        }
     }
 
-    // Contoh controller upload
     public function uploadPayment(Request $request, $id)
     {
-        $transaction = Transaction::find($id);
+        try {
+            $transaction = Transaction::findOrFail($id);
 
-        $path = $request->file('payment_proof')->store('payment_proofs', 'public');
-        $transaction->update(['payment_proof' => $path]);
+            $path = $request->file('payment_proof')->store('payment_proofs', 'public');
+            $transaction->update(['payment_proof' => $path]);
 
-        return back();
+            return redirect()->back()->with('success', 'Payment proof uploaded successfully');
+        } catch (\Exception $e) {
+            return redirect()->route('error.index')
+                ->with('error_message', 'Error: ' . $e->getMessage());
+        }
     }
 
     public function checkStatus($id)
     {
-        $transaction = Transaction::findOrFail($id);
-        return response()->json([
-            'status' => $transaction->status
-        ]);
+        try {
+            $transaction = Transaction::findOrFail($id);
+            return response()->json([
+                'status' => $transaction->status
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
     }
-    // app/Http/Controllers/TransactionController.php
+
     public function completeTransaction($id)
     {
         try {

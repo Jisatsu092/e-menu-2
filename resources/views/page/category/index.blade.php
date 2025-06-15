@@ -44,8 +44,7 @@
                                 @forelse ($categories as $category)
                                     <tr class="bg-white border-b hover:bg-red-50">
                                         <td class="px-4 py-2 md:px-6 md:py-4 font-semibold">{{ $no++ }}</td>
-                                        <td class="px-4 py-2 md:px-6 md:py-4 font-bold text-red-600">
-                                            {{ $category->name }}</td>
+                                        <td class="px-4 py-2 md:px-6 md:py-4 font-bold text-red-600">{{ $category->name }}</td>
                                         <td class="px-4 py-2 md:px-6 md:py-4 space-x-2 flex flex-wrap">
                                             <button data-id="{{ $category->id }}" data-name="{{ $category->name }}"
                                                 onclick="editCategoryModal(this)" class="edit-button">
@@ -89,13 +88,13 @@
                     ×
                 </button>
             </div>
-            <form id="createForm" action="{{ route('category.store') }}" method="POST" class="p-6">
+            <form id="createForm" class="p-6">
                 @csrf
                 <div class="mb-6">
                     <label for="name_create" class="block mb-2 text-sm font-medium text-red-600">Nama Kategori</label>
                     <input type="text" name="name" id="name_create"
                         class="bg-white border-2 border-red-600 text-red-600 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5"
-                        placeholder="Contoh: Makanan" required value="{{ old('name') }}">
+                        placeholder="Contoh: Makanan" required>
                 </div>
                 <div class="flex justify-end space-x-4">
                     <button type="submit"
@@ -122,14 +121,15 @@
                     ×
                 </button>
             </div>
-            <form id="editForm" method="POST" class="p-6">
+            <form id="editForm" class="p-6">
                 @csrf
                 @method('PUT')
                 <div class="mb-6">
                     <label for="name_edit" class="block mb-2 text-sm font-medium text-red-600">Nama Kategori</label>
                     <input type="text" name="name" id="name_edit"
                         class="bg-white border-2 border-red-600 text-red-600 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5"
-                        required value="{{ old('name') }}">
+                        required>
+                    <input type="hidden" name="id" id="category_id_edit">
                 </div>
                 <div class="flex justify-end space-x-4">
                     <button type="submit"
@@ -146,7 +146,6 @@
     </div>
 
     <style>
-        /* Tombol Edit */
         .edit-button {
             background: transparent;
             border: 2px solid yellow;
@@ -163,7 +162,6 @@
             background: transparent;
         }
 
-        /* Tombol Hapus */
         .delete-button {
             background: transparent;
             border: 2px solid red;
@@ -198,12 +196,97 @@
             const id = button.dataset.id;
             const name = button.dataset.name;
             const form = document.getElementById('editForm');
+            const categoryIdInput = document.getElementById('category_id_edit');
 
             form.action = `/category/${id}`;
             document.getElementById('name_edit').value = name;
+            categoryIdInput.value = id;
             document.getElementById('title_edit').innerText = `✏️ UPDATE ${name}`;
             toggleModal('editCategoryModal');
         }
+
+        document.getElementById('createForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+
+            fetch('{{ route('category.store') }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                toggleModal('createCategoryModal');
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: data.success,
+                        confirmButtonColor: '#dc2626'
+                    }).then(() => location.reload());
+                } else if (data.errors) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: Object.values(data.errors)[0],
+                        confirmButtonColor: '#dc2626'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Terjadi kesalahan saat menyimpan data.',
+                    confirmButtonColor: '#dc2626'
+                });
+            });
+        });
+
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+            let id = document.getElementById('category_id_edit').value;
+
+            fetch(`/category/${id}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                toggleModal('editCategoryModal');
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: data.success,
+                        confirmButtonColor: '#dc2626'
+                    }).then(() => location.reload());
+                } else if (data.errors) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: Object.values(data.errors)[0],
+                        confirmButtonColor: '#dc2626'
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Terjadi kesalahan saat memperbarui data.',
+                    confirmButtonColor: '#dc2626'
+                });
+            });
+        });
 
         document.querySelectorAll('.delete-form').forEach(form => {
             form.addEventListener('submit', function(e) {
@@ -225,48 +308,5 @@
                 });
             });
         });
-
-        @if (session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: '{{ session('success') }}',
-                confirmButtonColor: '#dc2626',
-                timer: 30000,
-                timerProgressBar: true,
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false
-            });
-        @endif
-
-        @if ($errors->any())
-            @php
-                $duplicateError = $errors->first('name', 'Nama kategori sudah ada, silakan gunakan nama lain.');
-            @endphp
-            @if ($duplicateError)
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal!',
-                    text: '{{ $duplicateError }}',
-                    confirmButtonColor: '#dc2626',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: true
-                });
-            @else
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal!',
-                    html: `@foreach ($errors->all() as $error)
-                            <p>{{ $error }}</p>
-                           @endforeach`,
-                    confirmButtonColor: '#dc2626',
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: true
-                });
-            @endif
-        @endif
     </script>
 </x-app-layout>

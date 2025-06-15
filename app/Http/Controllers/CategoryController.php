@@ -4,53 +4,31 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
-use Laravel\Pail\ValueObjects\Origin\Console;
 
 class CategoryController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar kategori dengan pagination dan pencarian.
      */
-public function index()
-{
-    try {
-        $entries = request()->input('entries', 5);
-        $search = request()->input('search');
-        
-        // Gunakan variabel plural "$categories" untuk koleksi data
-        $categories = Category::when($search, function ($query) use ($search) {
-            return $query->where('name', 'like', '%' . $search . '%');
-        })->paginate($entries);
-
-        // Kirim variabel "$categories" ke view
-        return view('page.category.index')->with([
-            'categories' => $categories, // <-- NAMA VARIABEL HARUS PLURAL
-            'entries' => $entries,
-            'search' => $search
-        ]);
-        
-    } catch (\Exception $e) {
-        return redirect()
-            ->route('error.index')
-            ->with('error_message', 'Error: ' . $e->getMessage());
-    }
-}
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function index()
     {
-        // $data = Category::all();
-        // return response()->json([
-        //     'data' => $data,
-        // ]);
+        try {
+            $entries = request()->input('entries', 5);
+            $search = request()->input('search');
+            
+            $categories = Category::when($search, function ($query) use ($search) {
+                return $query->where('name', 'like', '%' . $search . '%');
+            })->paginate($entries);
+
+            return view('page.category.index', compact('categories', 'entries', 'search'));
+        } catch (\Exception $e) {
+            return redirect()->route('error.index')->with('error_message', 'Error: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan kategori baru ke database.
      */
     public function store(Request $request)
     {
@@ -59,77 +37,68 @@ public function index()
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('category.index')
-                ->withErrors($validator)
-                ->withInput()
-                ->with('error_message', $validator->errors()->first());
+            if ($request->ajax()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            return redirect()->route('category.index')->withErrors($validator)->withInput();
         }
 
         try {
             Category::create($request->all());
-            return redirect()
-                ->route('category.index')
-                ->with('success', 'Kategori berhasil ditambahkan.');
+            if ($request->ajax()) {
+                return response()->json(['success' => 'Kategori berhasil ditambahkan.']);
+            }
+            return redirect()->route('category.index')->with('success', 'Kategori berhasil ditambahkan.');
         } catch (\Exception $e) {
-            return redirect()
-                ->route('category.index')
-                ->with('error_message', 'Terjadi kesalahan: ' . $e->getMessage());
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Terjadi kesalahan saat menyimpan data.'], 500);
+            }
+            return redirect()->route('error.index')->with('error_message', 'Error: ' . $e->getMessage());
         }
     }
 
     /**
-     * Update the specified resource in storage.
+     * Memperbarui data kategori yang ada.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|max:255|unique:categories,name,' . $id,
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('category.index')
-                ->withErrors($validator)
-                ->withInput()
-                ->with('error_message', $validator->errors()->first());
+            if ($request->ajax()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            return redirect()->route('category.index')->withErrors($validator)->withInput();
         }
 
         try {
             $category = Category::findOrFail($id);
             $category->update($request->all());
-            return redirect()
-                ->route('category.index')
-                ->with('success', 'Kategori berhasil diperbarui.');
+            if ($request->ajax()) {
+                return response()->json(['success' => 'Kategori berhasil diperbarui.']);
+            }
+            return redirect()->route('category.index')->with('success', 'Kategori berhasil diperbarui.');
         } catch (\Exception $e) {
-            return redirect()
-                ->route('category.index')
-                ->with('error_message', 'Terjadi kesalahan: ' . $e->getMessage());
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Terjadi kesalahan saat memperbarui data.'], 500);
+            }
+            return redirect()->route('error.index')->with('error_message', 'Error: ' . $e->getMessage());
         }
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus kategori dari database.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
         try {
             $category = Category::findOrFail($id);
             $category->delete();
-            return redirect()
-                ->route('category.index')
-                ->with('success', 'Kategori berhasil dihapus.');
+            return redirect()->route('category.index')->with('success', 'Kategori berhasil dihapus.');
         } catch (\Exception $e) {
-            return redirect()
-                ->route('category.index')
-                ->with('error_message', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->route('error.index')->with('error_message', 'Error: ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Check if a category name exists.
-     */
-    public function checkName($name)
-    {
-        $exists = Category::where('name', $name)->exists();
-        return response()->json(['exists' => $exists]);
     }
 }

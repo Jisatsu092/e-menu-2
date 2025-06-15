@@ -4,234 +4,248 @@
             {{ __('MANAJEMEN PAYMENT PROVIDER') }}
         </h2>
     </x-slot>
-    
-    <div class="py-12">
+
+    <div class="py-12 bg-white">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-2 border-blue-600">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border-2 border-blue-600 p-4">
                 <div class="p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <x-show-entries :route="route('payment_providers.index')" :search="request()->search" class="w-full md:w-auto" />
-                        <h3 class="text-lg font-medium text-blue-600">DAFTAR PAYMENT PROVIDER</h3>
-                        <button onclick="toggleModal('createProviderModal')"
-                            class="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-md">
-                            + Provider Baru
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                        <x-show-entries :route="route('payment_providers.index')" :search="request()->search" class="w-full md:w-auto"></x-show-entries>
+                        <h3 class="text-md md:text-lg font-medium text-blue-600">DAFTAR PAYMENT PROVIDER</h3>
+                        <button type="button" onclick="toggleModal('createProviderModal')"
+                            class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-xs md:text-sm px-4 py-2 md:px-5 md:py-2.5 shadow-md">
+                            + Tambah Provider
                         </button>
                     </div>
-                    
+
+                    @if ($errors->any())
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
-                        <table class="w-full text-sm text-left text-gray-900">
+                        <table class="w-full text-xs md:text-sm text-left text-gray-900">
                             <thead class="text-xs text-white uppercase bg-blue-600">
                                 <tr>
-                                    <th class="px-6 py-3">#</th>
-                                    <th class="px-6 py-3">Nama</th>
-                                    <th class="px-6 py-3">Nomor Rekening</th>
-                                    <th class="px-6 py-3">Tipe</th>
-                                    <th class="px-6 py-3">Status</th>
-                                    <th class="px-6 py-3">Aksi</th>
+                                    <th scope="col" class="px-4 py-2 md:px-6 md:py-3">#</th>
+                                    <th scope="col" class="px-4 py-2 md:px-6 md:py-3">NAMA</th>
+                                    <th scope="col" class="px-4 py-2 md:px-6 md:py-3">NOMOR REKENING</th>
+                                    <th scope="col" class="px-4 py-2 md:px-6 md:py-3">TIPE</th>
+                                    <th scope="col" class="px-4 py-2 md:px-6 md:py-3">STATUS</th>
+                                    <th scope="col" class="px-4 py-2 md:px-6 md:py-3">AKSI</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                @php
+                                    $no = $providers->firstItem();
+                                @endphp
                                 @foreach ($providers as $provider)
-                                <tr class="bg-white border-b hover:bg-blue-50">
-                                    <td class="px-6 py-4">{{ $loop->iteration }}</td>
-                                    <td class="px-6 py-4 font-bold text-blue-600">
-                                        <div class="flex items-center gap-2">
-                                            @if($provider->logo)
-                                            <img src="{{ asset($provider->logo) }}" class="w-8 h-8 rounded-full">
-                                            @endif
-                                            {{ $provider->name }}
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4">{{ $provider->account_number }}</td>
-                                    <td class="px-6 py-4">{{ ucfirst($provider->type) }}</td>
-                                    <td class="px-6 py-4">
-                                        <button onclick="toggleStatus('{{ $provider->id }}')"
-                                            class="relative inline-flex items-center w-10 h-6 transition-colors duration-300 ease-in-out rounded-full cursor-pointer
-                                            {{ $provider->is_active ? 'bg-green-500' : 'bg-red-500' }}">
-                                            <span class="sr-only">Toggle Status</span>
-                                            <span class="absolute left-0 w-6 h-6 transition-transform duration-300 ease-in-out transform bg-white rounded-full shadow-md
-                                                {{ $provider->is_active ? 'translate-x-4' : 'translate-x-0' }}">
-                                            </span>
-                                        </button>
-                                    </td>
-                                    <td class="px-6 py-4 space-x-2 flex items-center">
-                                        <button onclick="editProviderModal(this)"
-                                            data-id="{{ $provider->id }}"
-                                            data-name="{{ $provider->name }}"
-                                            data-account_number="{{ $provider->account_number }}"
-                                            data-account_name="{{ $provider->account_name }}"
-                                            data-type="{{ $provider->type }}"
-                                            data-instructions="{{ $provider->instructions }}"
-                                            data-logo="{{ $provider->logo }}"
-                                            class="edit-button">
-                                            ✏️
-                                        </button>
-                                        <button onclick="confirmDelete('{{ $provider->id }}')"
-                                            class="delete-button">
-                                            🗑️
-                                        </button>
-                                    </td>
-                                </tr>
+                                    <tr class="bg-white border-b hover:bg-blue-50">
+                                        <td class="px-4 py-2 md:px-6 md:py-4 font-semibold">{{ $no++ }}</td>
+                                        <td class="px-4 py-2 md:px-6 md:py-4 font-bold text-blue-600">
+                                            <div class="flex items-center gap-2">
+                                                @if ($provider->logo)
+                                                    <img src="{{ asset($provider->logo) }}"
+                                                        class="w-8 h-8 rounded-full object-cover" alt="Logo Provider">
+                                                @endif
+                                                {{ $provider->name }}
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-2 md:px-6 md:py-4">{{ $provider->account_number }}</td>
+                                        <td class="px-4 py-2 md:px-6 md:py-4">{{ ucfirst($provider->type) }}</td>
+                                        <td class="px-4 py-2 md:px-6 md:py-4">
+                                            <button onclick="toggleStatus('{{ $provider->id }}')"
+                                                class="relative inline-flex items-center w-10 h-6 transition-colors duration-300 ease-in-out rounded-full cursor-pointer
+                                                {{ $provider->is_active ? 'bg-green-500' : 'bg-red-500' }}">
+                                                <span class="sr-only">Toggle Status</span>
+                                                <span class="absolute left-0 w-6 h-6 transition-transform duration-300 ease-in-out transform bg-white rounded-full shadow-md
+                                                    {{ $provider->is_active ? 'translate-x-4' : 'translate-x-0' }}"></span>
+                                            </button>
+                                        </td>
+                                        <td class="px-4 py-2 md:px-6 md:py-4 space-x-2 flex flex-wrap">
+                                            <button data-id="{{ $provider->id }}" data-name="{{ $provider->name }}"
+                                                data-account_number="{{ $provider->account_number }}"
+                                                data-account_name="{{ $provider->account_name }}"
+                                                data-type="{{ $provider->type }}"
+                                                data-instructions="{{ $provider->instructions }}"
+                                                data-logo="{{ $provider->logo }}"
+                                                onclick="editProviderModal(this)"
+                                                class="edit-button">
+                                                ✏️
+                                            </button>
+                                            <form action="{{ route('payment_providers.destroy', $provider->id) }}" method="POST"
+                                                class="delete-form">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="delete-button">
+                                                    🗑️
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
-                    
-                    <div class="mt-4 text-blue-600">
-                        {{ $providers->links() }}
+                    <div class="mt-4 text-blue-600 text-xs md:text-sm">
+                        {{ $providers->appends(request()->query())->links() }}
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Modal Tambah Provider --}}
+    <!-- Modal Tambah Provider -->
     <div id="createProviderModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
         <div class="fixed inset-0 bg-black opacity-50"></div>
         <div class="relative bg-white rounded-lg shadow-2xl mx-4 md:mx-auto md:w-1/2 border-2 border-blue-600">
             <div class="flex items-start justify-between p-6 border-b-2 border-blue-600">
-                <h3 class="text-xl font-semibold text-blue-600">➕ Tambah Provider Baru</h3>
-                <button onclick="toggleModal('createProviderModal')"
-                    class="text-blue-600 hover:text-blue-800 text-2xl">×</button>
+                <h3 class="text-xl font-semibold text-blue-600">🆕 Tambah Provider Baru</h3>
+                <button type="button" onclick="toggleModal('createProviderModal')"
+                    class="text-blue-600 hover:text-blue-800 text-2xl">
+                    ×
+                </button>
             </div>
-            <form id="createProviderForm" action="{{ route('payment_providers.store') }}" method="POST" class="p-6" enctype="multipart/form-data">
+            <form id="createProviderForm" action="{{ route('payment_providers.store') }}" method="POST" enctype="multipart/form-data"
+                class="p-6">
                 @csrf
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="mb-4">
                         <label for="name_create" class="block mb-2 text-sm font-medium text-blue-600">Nama Provider</label>
                         <input type="text" name="name" id="name_create"
                             class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                            placeholder="Contoh: Dana" required>
+                            required value="{{ old('name') }}" placeholder="Contoh: Dana">
                     </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="account_number_create" class="block mb-2 text-sm font-medium text-blue-600">Nomor Rekening</label>
-                            <input type="text" name="account_number" id="account_number_create"
-                                class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                placeholder="Contoh: 081234567890" required>
-                        </div>
-                        
-                        <div>
-                            <label for="type_create" class="block mb-2 text-sm font-medium text-blue-600">Tipe</label>
-                            <select name="type" id="type_create"
-                                class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                required>
-                                <option value="e-wallet">E-Wallet</option>
-                                <option value="bank">Bank</option>
-                                <option value="other">Lainnya</option>
-                            </select>
-                        </div>
+                    <div class="mb-4">
+                        <label for="account_number_create" class="block mb-2 text-sm font-medium text-blue-600">Nomor Rekening</label>
+                        <input type="text" name="account_number" id="account_number_create"
+                            class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            required value="{{ old('account_number') }}" placeholder="Contoh: 081234567890">
                     </div>
-                    
-                    <div>
+                    <div class="mb-4">
                         <label for="account_name_create" class="block mb-2 text-sm font-medium text-blue-600">Nama Akun</label>
                         <input type="text" name="account_name" id="account_name_create"
                             class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                            placeholder="Contoh: Ajnira Ramen" required>
+                            required value="{{ old('account_name') }}" placeholder="Contoh: Ajnira Ramen">
                     </div>
-                    
-                    <div>
+                    <div class="mb-4">
+                        <label for="type_create" class="block mb-2 text-sm font-medium text-blue-600">Tipe</label>
+                        <select name="type" id="type_create"
+                            class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            required>
+                            <option value="e-wallet" {{ old('type') == 'e-wallet' ? 'selected' : '' }}>E-Wallet</option>
+                            <option value="bank" {{ old('type') == 'bank' ? 'selected' : '' }}>Bank</option>
+                            <option value="other" {{ old('type') == 'other' ? 'selected' : '' }}>Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="mb-4 md:col-span-2">
                         <label for="instructions_create" class="block mb-2 text-sm font-medium text-blue-600">Instruksi Pembayaran</label>
                         <textarea name="instructions" id="instructions_create" rows="3"
                             class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                            placeholder="Tambahkan instruksi pembayaran..."></textarea>
+                            placeholder="Tambahkan instruksi pembayaran...">{{ old('instructions') }}</textarea>
                     </div>
-                    
-                    <div>
+                    <div class="mb-4 md:col-span-2">
                         <label for="logo_create" class="block mb-2 text-sm font-medium text-blue-600">Logo Provider</label>
-                        <input type="file" name="logo" id="logo_create"
-                            class="block w-full text-sm text-blue-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                            accept="image/*">
+                        <div class="flex items-center gap-4">
+                            <div id="logoPreviewCreate" class="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden hidden">
+                                <img class="w-full h-full object-cover" alt="Preview Logo">
+                            </div>
+                            <input type="file" name="logo" id="logo_create"
+                                class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                accept="image/*" onchange="showLogoPreview(event, 'create')">
+                        </div>
                     </div>
                 </div>
-                
-                <div class="flex justify-end space-x-4 mt-6">
+                <div class="flex justify-end space-x-4 mt-4">
                     <button type="submit"
                         class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 shadow-md">
                         💾 Simpan
                     </button>
                     <button type="button" onclick="toggleModal('createProviderModal')"
                         class="text-blue-600 bg-white hover:bg-blue-50 border-2 border-blue-600 rounded-lg text-sm font-medium px-5 py-2.5">
-                        ✖️ Batal
+                        ✖ Batal
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    {{-- Modal Edit Provider --}}
+    <!-- Modal Edit Provider -->
     <div id="editProviderModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
         <div class="fixed inset-0 bg-black opacity-50"></div>
         <div class="relative bg-white rounded-lg shadow-2xl mx-4 md:mx-auto md:w-1/2 border-2 border-blue-600">
             <div class="flex items-start justify-between p-6 border-b-2 border-blue-600">
-                <h3 class="text-xl font-semibold text-blue-600" id="edit_title">✏️ Update Provider</h3>
-                <button onclick="toggleModal('editProviderModal')"
-                    class="text-blue-600 hover:text-blue-800 text-2xl">×</button>
+                <h3 class="text-xl font-semibold text-blue-600" id="title_edit">✏️ Update Provider</h3>
+                <button type="button" onclick="toggleModal('editProviderModal')"
+                    class="text-blue-600 hover:text-blue-800 text-2xl">
+                    ×
+                </button>
             </div>
-            <form id="editProviderForm" method="POST" class="p-6" enctype="multipart/form-data">
+            <form id="editProviderForm" method="POST" enctype="multipart/form-data" class="p-6">
                 @csrf
                 @method('PUT')
-                <div class="grid grid-cols-1 gap-6">
-                    <div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="mb-4">
                         <label for="name_edit" class="block mb-2 text-sm font-medium text-blue-600">Nama Provider</label>
                         <input type="text" name="name" id="name_edit"
                             class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                             required>
                     </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="account_number_edit" class="block mb-2 text-sm font-medium text-blue-600">Nomor Rekening</label>
-                            <input type="text" name="account_number" id="account_number_edit"
-                                class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                required>
-                        </div>
-                        
-                        <div>
-                            <label for="type_edit" class="block mb-2 text-sm font-medium text-blue-600">Tipe</label>
-                            <select name="type" id="type_edit"
-                                class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                required>
-                                <option value="e-wallet">E-Wallet</option>
-                                <option value="bank">Bank</option>
-                                <option value="other">Lainnya</option>
-                            </select>
-                        </div>
+                    <div class="mb-4">
+                        <label for="account_number_edit" class="block mb-2 text-sm font-medium text-blue-600">Nomor Rekening</label>
+                        <input type="text" name="account_number" id="account_number_edit"
+                            class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            required>
                     </div>
-                    
-                    <div>
+                    <div class="mb-4">
                         <label for="account_name_edit" class="block mb-2 text-sm font-medium text-blue-600">Nama Akun</label>
                         <input type="text" name="account_name" id="account_name_edit"
                             class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                             required>
                     </div>
-                    
-                    <div>
+                    <div class="mb-4">
+                        <label for="type_edit" class="block mb-2 text-sm font-medium text-blue-600">Tipe</label>
+                        <select name="type" id="type_edit"
+                            class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                            required>
+                            <option value="e-wallet">E-Wallet</option>
+                            <option value="bank">Bank</option>
+                            <option value="other">Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="mb-4 md:col-span-2">
                         <label for="instructions_edit" class="block mb-2 text-sm font-medium text-blue-600">Instruksi Pembayaran</label>
                         <textarea name="instructions" id="instructions_edit" rows="3"
                             class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"></textarea>
                     </div>
-                    
-                    <div>
-                        <label class="block mb-2 text-sm font-medium text-blue-600">Logo Saat Ini</label>
-                        <div id="current_logo_container" class="w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center">
-                            <img id="current_logo" class="max-w-full max-h-full">
+                    <div class="mb-4 md:col-span-2">
+                        <label for="logo_edit" class="block mb-2 text-sm font-medium text-blue-600">Logo Provider</label>
+                        <div class="flex items-center gap-4">
+                            <div id="currentLogo" class="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden">
+                                <img class="w-full h-full object-cover" alt="Logo Saat Ini">
+                            </div>
+                            <div id="logoPreviewEdit" class="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden hidden">
+                                <img class="w-full h-full object-cover" alt="Preview Logo Baru">
+                            </div>
+                            <input type="file" name="logo" id="logo_edit"
+                                class="bg-white border-2 border-blue-600 text-blue-600 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                accept="image/*" onchange="showLogoPreview(event, 'edit')">
                         </div>
-                        <input type="file" name="logo" id="logo_edit"
-                            class="block w-full mt-2 text-sm text-blue-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                            accept="image/*">
                     </div>
                 </div>
-                
-                <div class="flex justify-end space-x-4 mt-6">
+                <div class="flex justify-end space-x-4 mt-4">
                     <button type="submit"
                         class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 shadow-md">
-                        💾 Update
+                        💾 Simpan
                     </button>
                     <button type="button" onclick="toggleModal('editProviderModal')"
                         class="text-blue-600 bg-white hover:bg-blue-50 border-2 border-blue-600 rounded-lg text-sm font-medium px-5 py-2.5">
-                        ✖️ Batal
+                        ✖ Batal
                     </button>
                 </div>
             </form>
@@ -241,51 +255,46 @@
     <style>
         /* Tombol Edit */
         .edit-button {
-            background: transparent; /* Menghapus latar belakang */
-            border: 2px solid #FFC107; /* Stroke kuning (amber-500) */
-            color: #FFC107; /* Warna ikon dan teks kuning */
-            padding: 2px 4px; /* Sesuaikan padding */
-            border-radius: 4px; /* Sudut membulat */
-            font-size: 0.75rem; /* text-xs */
-            box-shadow: none; /* Menghapus shadow */
-            transition: border-color 0.3s ease, color 0.3s ease; /* Transisi untuk hover */
-            display: flex; /* Mengatur ikon dan teks sejajar */
-            align-items: center; /* Vertikal rata tengah */
-            gap: 4px; /* Jarak antara ikon dan teks */
+            background: transparent;
+            border: 2px solid #FFC107;
+            color: #FFC107;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            box-shadow: none;
+            transition: border-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-
         .edit-button:hover {
-            border-color: #D4A017; /* Kuning lebih gelap saat hover (amber-600) */
-            color: #D4A017; /* Ikon dan teks mengikuti warna hover */
-            background: transparent; /* Pastikan tetap transparan */
+            border-color: #D4A017;
+            background: transparent;
+            color: #D4A017;
         }
-
         /* Tombol Hapus */
         .delete-button {
-            background: transparent; /* Menghapus latar belakang */
-            border: 2px solid #DC2626; /* Stroke merah (red-600) */
-            color: #DC2626; /* Warna ikon dan teks merah */
-            padding: 2px 4px; /* Sesuaikan padding */
-            border-radius: 4px; /* Sudut membulat */
-            font-size: 0.75rem; /* text-xs */
-            box-shadow: none; /* Menghapus shadow */
-            transition: border-color 0.3s ease, color 0.3s ease; /* Transisi untuk hover */
-            display: flex; /* Mengatur ikon dan teks sejajar */
-            align-items: center; /* Vertikal rata tengah */
-            gap: 4px; /* Jarak antara ikon dan teks */
+            background: transparent;
+            border: 2px solid #DC2626;
+            color: #DC2626;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            box-shadow: none;
+            transition: border-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-
         .delete-button:hover {
-            border-color: #B91C1C; /* Merah lebih gelap saat hover (red-700) */
-            color: #B91C1C; /* Ikon dan teks mengikuti warna hover */
-            background: transparent; /* Pastikan tetap transparan */
+            border-color: #B91C1C;
+            background: transparent;
+            color: #B91C1C;
         }
-
         @media (min-width: 768px) {
-            .edit-button,
-            .delete-button {
-                padding: 8px 16px; /* md:px-4 md:py-2 */
-                font-size: 0.875rem; /* md:text-sm */
+            .edit-button, .delete-button {
+                padding: 8px 16px;
+                font-size: 0.875rem;
             }
         }
     </style>
@@ -293,35 +302,56 @@
     <script>
         // Fungsi Toggle Modal
         function toggleModal(modalId) {
-            document.getElementById(modalId).classList.toggle('hidden');
+            const modal = document.getElementById(modalId);
+            modal.classList.toggle('hidden');
+            document.body.classList.toggle('overflow-hidden');
+
+            if (modalId === 'createProviderModal') {
+                document.getElementById('logoPreviewCreate').classList.add('hidden');
+                document.getElementById('logo_create').value = '';
+            } else if (modalId === 'editProviderModal') {
+                document.getElementById('logoPreviewEdit').classList.add('hidden');
+                document.getElementById('logo_edit').value = '';
+            }
         }
 
-        // Fungsi Edit Provider
+        // Fungsi Preview Logo
+        function showLogoPreview(event, type) {
+            const input = event.target;
+            const previewId = type === 'create' ? 'logoPreviewCreate' : 'logoPreviewEdit';
+            const preview = document.getElementById(previewId);
+            const image = preview.querySelector('img');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    image.src = e.target.result;
+                    preview.classList.remove('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Fungsi Edit Modal
         function editProviderModal(button) {
             const id = button.dataset.id;
             const form = document.getElementById('editProviderForm');
-            form.action = `/payment_providers/${id}`;
+            const currentLogo = document.getElementById('currentLogo').querySelector('img');
 
-            // Isi data ke form
+            form.action = `/payment_providers/${id}`;
             document.getElementById('name_edit').value = button.dataset.name;
             document.getElementById('account_number_edit').value = button.dataset.account_number;
             document.getElementById('account_name_edit').value = button.dataset.account_name;
             document.getElementById('type_edit').value = button.dataset.type;
-            document.getElementById('instructions_edit').value = button.dataset.instructions;
+            document.getElementById('instructions_edit').value = button.dataset.instructions || '';
 
-            // Tampilkan logo saat ini
-            const logoContainer = document.getElementById('current_logo_container');
-            const currentLogo = document.getElementById('current_logo');
-            const logoPath = button.dataset.logo;
-            
-            if(logoPath) {
-                currentLogo.src = `{{ asset('') }}${logoPath}`; // Menggunakan asset tanpa 'storage/' karena logo sudah menggunakan path publik
-                logoContainer.classList.remove('hidden');
+            if (button.dataset.logo) {
+                currentLogo.src = "{{ asset('') }}" + button.dataset.logo;
             } else {
-                logoContainer.classList.add('hidden');
+                currentLogo.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23CBD5E0"><path d="M4 5h16v12H4z"/><path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/></svg>';
             }
 
-            document.getElementById('edit_title').innerText = `✏️ UPDATE PROVIDER #${id}`;
+            document.getElementById('title_edit').innerText = `✏️ Update ${button.dataset.name}`;
             toggleModal('editProviderModal');
         }
 
@@ -334,70 +364,63 @@
                     'Content-Type': 'application/json'
                 }
             });
-
-            if(response.ok) {
-                location.reload();
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: 'Status berhasil diubah.',
+                    confirmButtonColor: '#2563eb',
+                    timer: 2000
+                }).then(() => location.reload());
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: 'Gagal mengubah status.',
+                    confirmButtonColor: '#2563eb'
+                });
             }
         }
 
-        // Validasi Form Create
-        document.getElementById('createProviderForm')?.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('name_create').value;
-            const accountNumber = document.getElementById('account_number_create').value;
+        // Konfirmasi Hapus
+        document.querySelectorAll('.delete-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = this.closest('tr').querySelector('td:nth-child(2) .flex').textContent.trim();
 
-            if(!name || !accountNumber) {
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Nama Provider dan Nomor Rekening wajib diisi!'
+                    title: 'Hapus Provider?',
+                    html: `Yakin ingin menghapus <b>"${name}"</b>?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#2563eb',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) this.submit();
                 });
-                return;
-            }
-
-            Swal.fire({
-                title: 'Buat Provider Baru?',
-                html: `
-                    <div class="text-left">
-                        <p>Nama: <strong>${name}</strong></p>
-                        <p>Nomor Rekening: <strong>${accountNumber}</strong></p>
-                        <p>Tipe: <strong>${document.getElementById('type_create').value.toUpperCase()}</strong></p>
-                    </div>
-                `,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Buat!',
-                cancelButtonText: 'Batal',
-            }).then((result) => {
-                if (result.isConfirmed) this.submit();
             });
         });
 
-        // Konfirmasi Hapus
-        function confirmDelete(id) {
+        // Notifikasi
+        @if (session('success'))
             Swal.fire({
-                title: 'Hapus Provider?',
-                text: "Semua transaksi terkait akan tetap tersimpan!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Hapus!',
-                cancelButtonText: 'Batal',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(`/payment_providers/${id}`, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            }
-                        })
-                        .then(response => {
-                            if (response.ok) {
-                                Swal.fire('Terhapus!', 'Provider berhasil dihapus', 'success')
-                                    .then(() => location.reload());
-                            }
-                        });
-                }
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#2563eb',
+                timer: 3000
             });
-        }
+        @endif
+        @if (session('error_message'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: '{{ session('error_message') }}',
+                confirmButtonColor: '#2563eb',
+                timer: 5000
+            });
+        @endif
     </script>
 </x-app-layout>

@@ -7,13 +7,13 @@
     <style>
         @media print {
             @page { 
-                size: 80mm auto; /* Ukuran kertas thermal 80mm */
-                margin: 2mm 4mm; /* Margin kiri-kanan lebih kecil */
+                size: 80mm auto;
+                margin: 2mm 4mm;
                 padding: 0;
             }
             body { 
                 font-family: 'Courier New', monospace;
-                width: 72mm !important; /* Lebar konten sesungguhnya */
+                width: 72mm !important;
                 margin: 0 auto !important;
                 padding: 0;
                 font-size: 12px;
@@ -34,7 +34,6 @@
             }
         }
 
-        /* Style preview browser */
         @media screen {
             body {
                 font-family: 'Courier New', monospace;
@@ -47,7 +46,6 @@
             }
         }
 
-        /* Layout utama */
         .header { 
             text-align: center; 
             padding: 2mm 0;
@@ -73,13 +71,11 @@
             padding-left: 2mm;
         }
         
-        /* Spesifik untuk thermal printer */
         .thermal-text {
             font-weight: bold;
             letter-spacing: -0.5px;
         }
         
-        /* Optimasi gambar */
         .payment-proof img {
             border: 1px solid #ccc;
             padding: 1mm;
@@ -88,7 +84,6 @@
     </style>
 </head>
 <body>
-    <!-- Tombol Control -->
     <div class="no-print" style="text-align: center; padding: 5mm;">
         <button onclick="window.print()" style="margin: 2mm; padding: 3mm 5mm; background: #4CAF50; color: white; border: none; cursor: pointer;">
             🖨️ Cetak Ulang
@@ -98,7 +93,6 @@
         </button>
     </div>
 
-    <!-- Konten Struk -->
     <div class="thermal-text">
         <div class="header">
             <h3 style="margin: 1mm 0; font-size: 14px;">WARUNG SEBLAK AJNIRA</h3>
@@ -108,7 +102,6 @@
 
         <div class="divider"></div>
 
-        <!-- Info Transaksi -->
         <div class="transaction-info">
             <div class="item-row">
                 <span>No. Struk:</span>
@@ -124,13 +117,20 @@
             </div>
             <div class="item-row">
                 <span>Meja:</span>
-                <span>{{ $transaction->table->number ?? '-' }}</span>
+                <span>{{ $transaction->table_id === 'takeaway' ? 'Take Away' : ($transaction->table->number ?? '-') }}</span>
+            </div>
+            <div class="item-row">
+                <span>Level Pedas:</span>
+                <span>{{ ucfirst($transaction->spiciness_level) }}</span>
+            </div>
+            <div class="item-row">
+                <span>Ukuran Mangkok:</span>
+                <span>{{ ucfirst($transaction->bowl_size) }}</span>
             </div>
         </div>
 
         <div class="divider"></div>
 
-        <!-- Daftar Item -->
         <div class="items">
             @foreach($transaction->details as $detail)
             <div class="item-row">
@@ -144,7 +144,6 @@
 
         <div class="divider"></div>
 
-        <!-- Total -->
         <div class="total">
             <div class="item-row" style="font-weight: bold;">
                 <span>TOTAL</span>
@@ -160,7 +159,6 @@
             </div>
         </div>
 
-        <!-- Bukti Bayar -->
         @if($transaction->payment_proof && Storage::exists($transaction->payment_proof))
         <div class="payment-proof">
             <div class="divider"></div>
@@ -171,7 +169,6 @@
         </div>
         @endif
 
-        <!-- Footer -->
         <div class="footer" style="margin-top: 4mm;">
             <div class="divider"></div>
             <p style="text-align: center; margin: 3mm 0;">💐 Terima kasih telah berkunjung</p>
@@ -180,7 +177,6 @@
     </div>
 
     <script>
-        // Auto print dengan timeout untuk menghindari popup blocker
         window.addEventListener('load', function() {
             @if(!app()->environment('local'))
             setTimeout(function() {

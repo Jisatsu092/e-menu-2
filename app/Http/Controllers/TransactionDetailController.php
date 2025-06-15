@@ -16,52 +16,57 @@ class TransactionDetailController extends Controller
      */
     public function index(Request $request)
     {
-        // Buat query dengan relasi dan urutkan dari yang terbaru
-        $query = TransactionDetail::with(['transaction', 'toping'])->latest();
+        try {
+            // Buat query dengan relasi dan urutkan dari yang terbaru
+            $query = TransactionDetail::with(['transaction', 'toping'])->latest();
 
-        // Filter berdasarkan user_id untuk non-admin
-        if (!Gate::allows('role-A')) {
-            $userId = Auth::id();
-            $query->whereHas('transaction', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            });
+            // Filter berdasarkan user_id untuk non-admin
+            if (!Gate::allows('role-A')) {
+                $userId = Auth::id();
+                $query->whereHas('transaction', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                });
+            }
+
+            // Filter berdasarkan rentang tanggal jika ada
+            if ($request->start_date && $request->end_date) {
+                $start = Carbon::parse($request->start_date)->startOfDay();
+                $end = Carbon::parse($request->end_date)->endOfDay();
+                
+                $query->whereHas('transaction', function ($q) use ($start, $end) {
+                    $q->whereBetween('created_at', [$start, $end]);
+                    // Terapkan filter user_id untuk non-admin
+                    if (!Gate::allows('role-A')) {
+                        $q->where('user_id', Auth::id());
+                    }
+                });
+            }
+
+            // Kelompokkan transaksi berdasarkan transaction_id
+            $groupedTransactions = $query->get()->groupBy('transaction_id');
+
+            // Paginasi manual
+            $perPage = 10;
+            $page = $request->get('page', 1);
+            $total = $groupedTransactions->count();
+            $groupedTransactions = $groupedTransactions->slice(($page - 1) * $perPage, $perPage);
+
+            // Buat koleksi paginasi
+            $details = new \Illuminate\Pagination\LengthAwarePaginator(
+                $groupedTransactions,
+                $total,
+                $perPage,
+                $page,
+                ['path' => route('transaction_details.index')]
+            );
+
+            return view('page.transaction_detail.index', [
+                'details' => $details
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('error.index')
+                ->with('error_message', 'Error: ' . $e->getMessage());
         }
-
-        // Filter berdasarkan rentang tanggal jika ada
-        if ($request->start_date && $request->end_date) {
-            $start = Carbon::parse($request->start_date)->startOfDay();
-            $end = Carbon::parse($request->end_date)->endOfDay();
-            
-            $query->whereHas('transaction', function ($q) use ($start, $end) {
-                $q->whereBetween('created_at', [$start, $end]);
-                // Terapkan filter user_id untuk non-admin
-                if (!Gate::allows('role-A')) {
-                    $q->where('user_id', Auth::id());
-                }
-            });
-        }
-
-        // Kelompokkan transaksi berdasarkan transaction_id
-        $groupedTransactions = $query->get()->groupBy('transaction_id');
-
-        // Paginasi manual
-        $perPage = 10;
-        $page = $request->get('page', 1);
-        $total = $groupedTransactions->count();
-        $groupedTransactions = $groupedTransactions->slice(($page - 1) * $perPage, $perPage);
-
-        // Buat koleksi paginasi
-        $details = new \Illuminate\Pagination\LengthAwarePaginator(
-            $groupedTransactions,
-            $total,
-            $perPage,
-            $page,
-            ['path' => route('transaction_details.index')]
-        );
-
-        return view('page.transaction_detail.index', [
-            'details' => $details
-        ]);
     }
 
     /**
@@ -70,39 +75,44 @@ class TransactionDetailController extends Controller
      */
     public function report(Request $request)
     {
-        // Buat query dengan relasi
-        $query = TransactionDetail::with(['transaction', 'toping']);
+        try {
+            // Buat query dengan relasi
+            $query = TransactionDetail::with(['transaction', 'toping']);
 
-        // Filter berdasarkan user_id untuk non-admin
-        if (!Gate::allows('role-A')) {
-            $userId = Auth::id();
-            $query->whereHas('transaction', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            });
+            // Filter berdasarkan user_id untuk non-admin
+            if (!Gate::allows('role-A')) {
+                $userId = Auth::id();
+                $query->whereHas('transaction', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                });
+            }
+
+            // Filter berdasarkan rentang tanggal jika ada
+            if ($request->start_date && $request->end_date) {
+                $start = Carbon::parse($request->start_date)->startOfDay();
+                $end = Carbon::parse($request->end_date)->endOfDay();
+                
+                $query->whereHas('transaction', function ($q) use ($start, $end) {
+                    $q->whereBetween('created_at', [$start, $end]);
+                    // Terapkan filter user_id untuk non-admin
+                    if (!Gate::allows('role-A')) {
+                        $q->where('user_id', Auth::id());
+                    }
+                });
+            }
+
+            // Kelompokkan transaksi berdasarkan transaction_id
+            $groupedTransactions = $query->get()->groupBy('transaction_id');
+
+            return view('page.transaction_detail.report', [
+                'transactions' => $groupedTransactions,
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('error.index')
+                ->with('error_message', 'Error: ' . $e->getMessage());
         }
-
-        // Filter berdasarkan rentang tanggal jika ada
-        if ($request->start_date && $request->end_date) {
-            $start = Carbon::parse($request->start_date)->startOfDay();
-            $end = Carbon::parse($request->end_date)->endOfDay();
-            
-            $query->whereHas('transaction', function ($q) use ($start, $end) {
-                $q->whereBetween('created_at', [$start, $end]);
-                // Terapkan filter user_id untuk non-admin
-                if (!Gate::allows('role-A')) {
-                    $q->where('user_id', Auth::id());
-                }
-            });
-        }
-
-        // Kelompokkan transaksi berdasarkan transaction_id
-        $groupedTransactions = $query->get()->groupBy('transaction_id');
-
-        return view('page.transaction_detail.report', [
-            'transactions' => $groupedTransactions,
-            'start_date' => $request->start_date,
-            'end_date' => $request->end_date
-        ]);
     }
 
     /**
@@ -111,17 +121,22 @@ class TransactionDetailController extends Controller
      */
     public function destroyAll()
     {
-        // Filter berdasarkan user_id untuk non-admin
-        if (!Gate::allows('role-A')) {
-            $userId = Auth::id();
-            TransactionDetail::whereHas('transaction', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            })->delete();
-        } else {
-            // Admin dapat menghapus semua detail transaksi
-            TransactionDetail::truncate();
-        }
+        try {
+            // Filter berdasarkan user_id untuk non-admin
+            if (!Gate::allows('role-A')) {
+                $userId = Auth::id();
+                TransactionDetail::whereHas('transaction', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                })->delete();
+            } else {
+                // Admin dapat menghapus semua detail transaksi
+                TransactionDetail::truncate();
+            }
 
-        return redirect()->back()->with('success', 'Semua detail transaksi berhasil dihapus');
+            return redirect()->back()->with('success', 'Semua detail transaksi berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->route('error.index')
+                ->with('error_message', 'Error: ' . $e->getMessage());
+        }
     }
 }

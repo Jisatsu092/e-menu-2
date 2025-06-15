@@ -272,55 +272,51 @@
     <style>
         /* Tombol Edit */
         .edit-button {
-            background: transparent; /* Menghapus latar belakang */
-            border: 2px solid #FFC107; /* Stroke kuning (amber-500) */
-            color: #FFC107; /* Warna ikon dan teks kuning */
-            padding: 2px 4px; /* Sesuaikan padding */
-            border-radius: 4px; /* Sudut membulat */
-            font-size: 0.75rem; /* text-xs */
-            box-shadow: none; /* Menghapus shadow */
-            transition: border-color 0.3s ease; /* Transisi untuk hover */
-            display: flex; /* Mengatur ikon dan teks sejajar */
-            align-items: center; /* Vertikal rata tengah */
-            gap: 4px; /* Jarak antara ikon dan teks */
+            background: transparent;
+            border: 2px solid #FFC107;
+            color: #FFC107;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            box-shadow: none;
+            transition: border-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-
         .edit-button:hover {
-            border-color: #D4A017; /* Kuning lebih gelap saat hover (amber-600) */
-            background: transparent; /* Pastikan tetap transparan saat hover */
-            color: #D4A017; /* Ikon dan teks mengikuti warna hover */
+            border-color: #D4A017;
+            background: transparent;
+            color: #D4A017;
         }
-
         /* Tombol Hapus */
         .delete-button {
-            background: transparent; /* Menghapus latar belakang */
-            border: 2px solid #DC2626; /* Stroke merah (red-600) */
-            color: #DC2626; /* Warna ikon dan teks merah */
-            padding: 2px 4px; /* Sesuaikan padding */
-            border-radius: 4px; /* Sudut membulat */
-            font-size: 0.75rem; /* text-xs */
-            box-shadow: none; /* Menghapus shadow */
-            transition: border-color 0.3s ease; /* Transisi untuk hover */
-            display: flex; /* Mengatur ikon dan teks sejajar */
-            align-items: center; /* Vertikal rata tengah */
-            gap: 4px; /* Jarak antara ikon dan teks */
+            background: transparent;
+            border: 2px solid #DC2626;
+            color: #DC2626;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            box-shadow: none;
+            transition: border-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-
         .delete-button:hover {
-            border-color: #B91C1C; /* Merah lebih gelap saat hover (red-700) */
-            background: transparent; /* Pastikan tetap transparan saat hover */
-            color: #B91C1C; /* Ikon dan teks mengikuti warna hover */
+            border-color: #B91C1C;
+            background: transparent;
+            color: #B91C1C;
         }
-
         @media (min-width: 768px) {
-            .edit-button,
-            .delete-button {
-                padding: 8px 16px; /* md:px-4 md:py-2 */
-                font-size: 0.875rem; /* md:text-sm */
+            .edit-button, .delete-button {
+                padding: 8px 16px;
+                font-size: 0.875rem;
             }
         }
     </style>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Fungsi Toggle Modal
         function toggleModal(modalId) {
@@ -328,7 +324,6 @@
             modal.classList.toggle('hidden');
             document.body.classList.toggle('overflow-hidden');
 
-            // Reset preview saat modal ditutup
             if (modalId === 'createTopingModal') {
                 document.getElementById('imagePreviewCreate').classList.add('hidden');
                 document.getElementById('image_create').value = '';
@@ -363,7 +358,7 @@
             const price = parseFloat(priceInput.value) || 0;
             const margin = price * 0.25;
             const total = price + margin;
-            const rounded = Math.round(total / 500) * 500; // Bulatkan ke kelipatan 500
+            const rounded = Math.round(total / 500) * 500;
             priceBuyInput.value = rounded;
         }
 
@@ -380,12 +375,10 @@
             document.getElementById('price_buy_edit').value = button.dataset.priceBuy;
             document.getElementById('stock_edit').value = button.dataset.stock;
 
-            // Set gambar saat ini
             if (button.dataset.image) {
-                currentImage.src = "{{ asset('toping_images') }}/" + button.dataset.image;
+                currentImage.src = "{{ asset('') }}" + button.dataset.image;
             } else {
-                currentImage.src =
-                    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23CBD5E0"><path d="M4 5h16v12H4z"/><path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/></svg>';
+                currentImage.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23CBD5E0"><path d="M4 5h16v12H4z"/><path d="M12 9a3 3 0 100 6 3 3 0 000-6z"/></svg>';
             }
 
             document.getElementById('title_edit').innerText = `✏️ Update ${button.dataset.name}`;
@@ -396,6 +389,7 @@
         document.querySelectorAll('.delete-form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
+                console.log('Delete form submitted');
                 const stock = parseInt(this.dataset.stock);
                 const name = this.closest('tr').querySelector('td:nth-child(2)').textContent;
 
@@ -424,6 +418,7 @@
 
         // Notifikasi
         @if (session('success'))
+            console.log('Sesi success tersedia: {{ session('success') }}');
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
@@ -432,8 +427,8 @@
                 timer: 3000
             });
         @endif
-
         @if (session('error_message'))
+            console.log('Sesi error_message tersedia: {{ session('error_message') }}');
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal!',

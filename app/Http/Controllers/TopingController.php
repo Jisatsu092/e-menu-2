@@ -15,7 +15,6 @@ class TopingController extends Controller
     {
         $margin = $price * 0.25; // 25% dari harga beli
         $total = $price + $margin; // Harga jual awal
-        // Bulatkan ke kelipatan 1000 atau 500 terdekat
         $rounded = round($total / 500) * 500; // Round ke kelipatan 500
         return $rounded;
     }
@@ -54,7 +53,7 @@ class TopingController extends Controller
      */
     public function store(Request $request)
     {
-        // try {
+        try {
             $request->validate([
                 'name' => 'required|unique:topings|max:255',
                 'category_id' => 'required|exists:categories,id',
@@ -62,7 +61,7 @@ class TopingController extends Controller
                 'stock' => 'required|integer|min:0',
                 'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
             ]);
-    
+
             $data = [
                 'name' => $request->input('name'),
                 'category_id' => $request->input('category_id'),
@@ -70,44 +69,40 @@ class TopingController extends Controller
                 'price_buy' => $this->calculatePriceBuy($request->input('price')),
                 'stock' => $request->input('stock'),
             ];
-    
+
             if ($request->hasFile('image')) {
-                // Pastikan direktori toping_images ada
                 $directory = public_path('toping_images');
                 if (!file_exists($directory)) {
                     if (!mkdir($directory, 0755, true)) {
                         throw new \Exception('Gagal membuat direktori toping_images. Periksa izin direktori public.');
                     }
                 }
-    
-                // Pastikan direktori dapat ditulis
+
                 if (!is_writable($directory)) {
                     throw new \Exception('Direktori toping_images tidak dapat ditulis. Periksa izin direktori.');
                 }
-    
-                // Simpan gambar baru
+
                 $image = $request->file('image');
                 $imageName = time() . '_' . preg_replace('/[^A-Za-z0-9\-\_\.]/', '', $image->getClientOriginalName());
                 $imagePath = 'toping_images/' . $imageName;
-    
-                // Pindahkan file dan periksa keberhasilan
+
                 if (!$image->move($directory, $imageName)) {
                     throw new \Exception('Gagal menyimpan gambar. Periksa izin direktori atau ukuran file.');
                 }
-    
+
                 $data['image'] = $imagePath;
             }
-    
+
             Toping::create($data);
-    
+
             return redirect()
                 ->route('toping.index')
                 ->with('success', 'Data topping berhasil ditambahkan.');
-        // } catch (\Exception $e) {
-        //     return redirect()
-        //         ->route('error.index')
-        //         ->with('error_message', 'Terjadi kesalahan saat menambahkan data topping: ' . $e->getMessage());
-        // }
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('error.index')
+                ->with('error_message', 'Error: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -128,19 +123,17 @@ class TopingController extends Controller
                 'name' => $request->input('name'),
                 'category_id' => $request->input('category_id'),
                 'price' => $request->input('price'),
-                'price_buy' => $this->calculatePriceBuy($request->input('price')), // Hitung price_buy
+                'price_buy' => $this->calculatePriceBuy($request->input('price')),
                 'stock' => $request->input('stock'),
             ];
 
             $toping = Toping::findOrFail($id);
 
             if ($request->hasFile('image')) {
-                // Hapus gambar lama jika ada
                 if ($toping->image && file_exists(public_path($toping->image))) {
                     unlink(public_path($toping->image));
                 }
 
-                // Simpan gambar baru
                 $image = $request->file('image');
                 $imageName = time() . '_' . $image->getClientOriginalName();
                 $imagePath = 'toping_images/' . $imageName;
@@ -156,7 +149,7 @@ class TopingController extends Controller
         } catch (\Exception $e) {
             return redirect()
                 ->route('error.index')
-                ->with('error_message', 'Terjadi kesalahan saat memperbarui data topping: ' . $e->getMessage());
+                ->with('error_message', 'Error: ' . $e->getMessage());
         }
     }
 
@@ -169,7 +162,9 @@ class TopingController extends Controller
             $toping = Toping::findOrFail($id);
 
             if ($toping->stock > 0) {
-                return back()->with('error_message', 'Tidak dapat menghapus toping yang masih memiliki stok.');
+                return redirect()
+                    ->route('error.index')
+                    ->with('error_message', 'Error: Tidak dapat menghapus toping yang masih memiliki stok.');
             }
 
             if ($toping->image) {
@@ -177,9 +172,13 @@ class TopingController extends Controller
             }
 
             $toping->delete();
-            return back()->with('success', 'Data topping berhasil dihapus.');
+            return redirect()
+                ->route('toping.index')
+                ->with('success', 'Data topping berhasil dihapus.');
         } catch (\Exception $e) {
-            return back()->with('error_message', 'Terjadi kesalahan saat menghapus data topping: ' . $e->getMessage());
+            return redirect()
+                ->route('error.index')
+                ->with('error_message', 'Error: ' . $e->getMessage());
         }
     }
 
@@ -188,13 +187,20 @@ class TopingController extends Controller
      */
     public function checkName($name, Request $request)
     {
-        $id = $request->query('id');
-        $exists = Toping::where('name', $name)
-            ->when($id, function ($query) use ($id) {
-                $query->where('id', '!=', $id);
-            })
-            ->exists();
+        try {
+            $id = $request->query('id');
+            $exists = Toping::where('name', $name)
+                ->when($id, function ($query) use ($id) {
+                    $query->where('id', '!=', $id);
+                })
+                ->exists();
 
-        return response()->json(['exists' => $exists]);
+            return response()->json(['exists' => $exists]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

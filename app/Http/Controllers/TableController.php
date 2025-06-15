@@ -29,7 +29,7 @@ class TableController extends Controller
         } catch (Exception $e) {
             return redirect()
                 ->route('error.index')
-                ->with('error_message', 'Terjadi kesalahan saat memuat data meja: ' . $e->getMessage());
+                ->with('error_message', 'Error: ' . $e->getMessage());
         }
     }
 
@@ -63,7 +63,7 @@ class TableController extends Controller
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -100,7 +100,7 @@ class TableController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -117,7 +117,7 @@ class TableController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -129,7 +129,8 @@ class TableController extends Controller
             return response()->json(['exists' => $exists]);
         } catch (Exception $e) {
             return response()->json([
-                'error' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -152,7 +153,7 @@ class TableController extends Controller
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => 'Error: ' . $e->getMessage()
             ], 500);
         }
     }

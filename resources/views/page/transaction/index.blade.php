@@ -134,7 +134,7 @@
                 <button onclick="toggleModal('createTransactionModal')"
                     class="text-blue-600 hover:text-blue-800 text-2xl">×</button>
             </div>
-            <form id="createTransactionForm" action="{{ route('transaction.store') }}" method="POST" class="p-6"
+            <form id="createTransactionForm" onsubmit="event.preventDefault(); submitTransactionForm('createTransactionForm')" action="{{ route('transaction.store') }}" method="POST" class="p-6"
                 enctype="multipart/form-data">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -247,7 +247,7 @@
                 <button onclick="toggleModal('editTransactionModal')"
                     class="text-blue-600 hover:text-blue-800 text-2xl">×</button>
             </div>
-            <form id="editTransactionForm" method="POST" class="p-6" enctype="multipart/form-data">
+            <form id="editTransactionForm" onsubmit="event.preventDefault(); submitTransactionForm('editTransactionForm')" method="POST" class="p-6" enctype="multipart/form-data">
                 @csrf
                 @method('PATCH')
                 <div
@@ -375,73 +375,73 @@
     <style>
         /* Tombol Proses */
         .process-button {
-            background: transparent; /* Menghapus latar belakang */
-            border: 2px solid #3B82F6; /* Stroke biru (blue-500) */
-            color: #3B82F6; /* Warna ikon dan teks biru */
-            padding: 2px 4px; /* Sesuaikan padding */
-            border-radius: 4px; /* Sudut membulat */
-            font-size: 0.75rem; /* text-xs */
-            box-shadow: none; /* Menghapus shadow */
-            transition: border-color 0.3s ease, color 0.3s ease; /* Transisi untuk hover */
-            display: flex; /* Mengatur ikon dan teks sejajar */
-            align-items: center; /* Vertikal rata tengah */
-            gap: 4px; /* Jarak antara ikon dan teks */
+            background: transparent;
+            border: 2px solid #3B82F6;
+            color: #3B82F6;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            box-shadow: none;
+            transition: border-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .process-button:hover {
-            border-color: #2563EB; /* Biru lebih gelap saat hover (blue-600) */
-            color: #2563EB; /* Ikon dan teks mengikuti warna hover */
-            background: transparent; /* Pastikan tetap transparan */
+            border-color: #2563EB;
+            color: #2563EB;
+            background: transparent;
         }
 
         /* Tombol Edit */
         .edit-button {
-            background: transparent; /* Menghapus latar belakang */
-            border: 2px solid #FFC107; /* Stroke kuning (amber-500) */
-            color: #FFC107; /* Warna ikon dan teks kuning */
-            padding: 2px 4px; /* Sesuaikan padding */
-            border-radius: 4px; /* Sudut membulat */
-            font-size: 0.75rem; /* text-xs */
-            box-shadow: none; /* Menghapus shadow */
-            transition: border-color 0.3s ease, color 0.3s ease; /* Transisi untuk hover */
-            display: flex; /* Mengatur ikon dan teks sejajar */
-            align-items: center; /* Vertikal rata tengah */
-            gap: 4px; /* Jarak antara ikon dan teks */
+            background: transparent;
+            border: 2px solid #FFC107;
+            color: #FFC107;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            box-shadow: none;
+            transition: border-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .edit-button:hover {
-            border-color: #D4A017; /* Kuning lebih gelap saat hover (amber-600) */
-            color: #D4A017; /* Ikon dan teks mengikuti warna hover */
-            background: transparent; /* Pastikan tetap transparan */
+            border-color: #D4A017;
+            color: #D4A017;
+            background: transparent;
         }
 
         /* Tombol Hapus */
         .delete-button {
-            background: transparent; /* Menghapus latar belakang */
-            border: 2px solid #DC2626; /* Stroke merah (red-600) */
-            color: #DC2626; /* Warna ikon dan teks merah */
-            padding: 2px 4px; /* Sesuaikan padding */
-            border-radius: 4px; /* Sudut membulat */
-            font-size: 0.75rem; /* text-xs */
-            box-shadow: none; /* Menghapus shadow */
-            transition: border-color 0.3s ease, color 0.3s ease; /* Transisi untuk hover */
-            display: flex; /* Mengatur ikon dan teks sejajar */
-            align-items: center; /* Vertikal rata tengah */
-            gap: 4px; /* Jarak antara ikon dan teks */
+            background: transparent;
+            border: 2px solid #DC2626;
+            color: #DC2626;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            box-shadow: none;
+            transition: border-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .delete-button:hover {
-            border-color: #B91C1C; /* Merah lebih gelap saat hover (red-700) */
-            color: #B91C1C; /* Ikon dan teks mengikuti warna hover */
-            background: transparent; /* Pastikan tetap transparan */
+            border-color: #B91C1C;
+            color: #B91C1C;
+            background: transparent;
         }
 
         @media (min-width: 768px) {
             .process-button,
             .edit-button,
             .delete-button {
-                padding: 8px 16px; /* md:px-4 md:py-2 */
-                font-size: 0.875rem; /* md:text-sm */
+                padding: 8px 16px;
+                font-size: 0.875rem;
             }
         }
 
@@ -568,6 +568,7 @@
         };
 
         window.processTransaction = async function(id) {
+            console.log('processTransaction called with id:', id);
             try {
                 const konfirmasi = await Swal.fire({
                     title: 'Proses Transaksi?',
@@ -595,6 +596,7 @@
                 });
 
                 const result = await response.json();
+                console.log('Response from server:', result);
 
                 if (!response.ok) {
                     throw new Error(result.message || 'Gagal memperbarui status');
@@ -611,14 +613,14 @@
                 });
 
             } catch (error) {
+                console.error('Error in processTransaction:', error);
                 Swal.fire('Error!', error.message, 'error');
             }
         };
 
         window.confirmDelete = async function(id) {
-            const {
-                isConfirmed
-            } = await Swal.fire({
+            console.log('confirmDelete called with id:', id);
+            const { isConfirmed } = await Swal.fire({
                 title: 'Hapus Transaksi?',
                 text: "Data tidak bisa dikembalikan!",
                 icon: 'warning',
@@ -637,20 +639,23 @@
                     });
 
                     if (!response.ok) throw new Error('Gagal menghapus transaksi');
+                    console.log('Transaction deleted successfully');
                     window.location.reload();
                 } catch (error) {
+                    console.error('Error in confirmDelete:', error);
                     Swal.fire('Error!', error.message, 'error');
                 }
             }
         };
 
         window.submitTransactionForm = async function(formId) {
+            console.log('submitTransactionForm called for form:', formId);
             const form = document.getElementById(formId);
             const formData = new FormData(form);
 
             try {
                 const response = await fetch(form.action, {
-                    method: form.method,
+                    method: form.method === 'POST' ? 'POST' : 'PATCH',
                     body: formData,
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -658,26 +663,63 @@
                     }
                 });
 
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Response tidak valid dari server');
-                }
-
                 const result = await response.json();
+                console.log('Response from server:', result);
 
                 if (!response.ok) {
                     throw new Error(result.message || 'Terjadi kesalahan server');
                 }
 
-                window.location.reload();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: result.message || 'Transaksi berhasil disimpan',
+                    confirmButtonColor: '#3085d6',
+                    timer: 1500
+                }).then(() => {
+                    window.location.reload();
+                });
             } catch (error) {
+                console.error('Error in submitTransactionForm:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Gagal menyimpan!',
                     text: error.message,
+                    confirmButtonColor: '#d33'
                 });
-                console.error('Error Details:', error);
             }
         };
+
+        // Notifikasi berdasarkan sesi
+        @if (session('success'))
+            console.log('Sesi success tersedia: {{ session('success') }}');
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#3085d6',
+                timer: 3000
+            });
+        @endif
+        @if (session('message_insert'))
+            console.log('Sesi message_insert tersedia: {{ session('message_insert') }}');
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('message_insert') }}',
+                confirmButtonColor: '#3085d6',
+                timer: 3000
+            });
+        @endif
+        @if (session('error_message'))
+            console.log('Sesi error_message tersedia: {{ session('error_message') }}');
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: '{{ session('error_message') }}',
+                confirmButtonColor: '#d33',
+                timer: 5000
+            });
+        @endif
     </script>
 </x-app-layout>
