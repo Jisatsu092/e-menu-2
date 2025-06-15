@@ -67,9 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('transaction', TransactionController::class);
     Route::resource('transaction_details', TransactionDetailController::class);
     Route::resource('payment_providers', PaymentProviderController::class);
-    Route::middleware('auth')->group(function () {
-        Route::resource('userInterface', userInterfaceController::class);
-    });
+    Route::resource('userInterface', userInterfaceController::class);
     Route::resource('error', ErrorController::class);
 
     // Rute Khusus Kategori

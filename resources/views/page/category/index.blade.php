@@ -148,43 +148,43 @@
     <style>
         /* Tombol Edit */
         .edit-button {
-            background: transparent; /* Menghapus latar belakang */
-            border: 2px solid yellow; /* Stroke hitam */
-            color: black; /* Warna ikon menjadi hitam */
-            padding: 2px 4px; /* Sesuaikan padding */
-            border-radius: 4px; /* Sudut membulat */
-            font-size: 0.75rem; /* text-xs */
-            box-shadow: none; /* Menghapus shadow */
-            transition: border-color 0.3s ease; /* Transisi untuk hover */
+            background: transparent;
+            border: 2px solid yellow;
+            color: black;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            box-shadow: none;
+            transition: border-color 0.3s ease;
         }
 
         .edit-button:hover {
-            border-color: #555; /* Warna border saat hover */
-            background: transparent; /* Pastikan tetap transparan saat hover */
+            border-color: #555;
+            background: transparent;
         }
 
         /* Tombol Hapus */
         .delete-button {
-            background: transparent; /* Menghapus latar belakang */
-            border: 2px solid red; /* Stroke hitam */
-            color: black; /* Warna ikon menjadi hitam */
-            padding: 2px 4px; /* Sesuaikan padding */
-            border-radius: 4px; /* Sudut membulat */
-            font-size: 0.75rem; /* text-xs */
-            box-shadow: none; /* Menghapus shadow */
-            transition: border-color 0.3s ease; /* Transisi untuk hover */
+            background: transparent;
+            border: 2px solid red;
+            color: black;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            box-shadow: none;
+            transition: border-color 0.3s ease;
         }
 
         .delete-button:hover {
-            border-color: #555; /* Warna border saat hover */
-            background: transparent; /* Pastikan tetap transparan saat hover */
+            border-color: #555;
+            background: transparent;
         }
 
         @media (min-width: 768px) {
             .edit-button,
             .delete-button {
-                padding: 8px 16px; /* md:px-4 md:py-2 */
-                font-size: 0.875rem; /* md:text-sm */
+                padding: 8px 16px;
+                font-size: 0.875rem;
             }
         }
     </style>
@@ -232,19 +232,41 @@
                 title: 'Berhasil!',
                 text: '{{ session('success') }}',
                 confirmButtonColor: '#dc2626',
-                timer: 3000
+                timer: 30000,
+                timerProgressBar: true,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false
             });
         @endif
 
         @if ($errors->any())
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                html: `@foreach ($errors->all() as $error)
-                        <p>{{ $error }}</p>
-                       @endforeach`,
-                confirmButtonColor: '#dc2626'
-            });
+            @php
+                $duplicateError = $errors->first('name', 'Nama kategori sudah ada, silakan gunakan nama lain.');
+            @endphp
+            @if ($duplicateError)
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ $duplicateError }}',
+                    confirmButtonColor: '#dc2626',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: true
+                });
+            @else
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    html: `@foreach ($errors->all() as $error)
+                            <p>{{ $error }}</p>
+                           @endforeach`,
+                    confirmButtonColor: '#dc2626',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: true
+                });
+            @endif
         @endif
     </script>
 </x-app-layout>

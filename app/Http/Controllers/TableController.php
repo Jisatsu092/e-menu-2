@@ -87,13 +87,7 @@ class TableController extends Controller
                 ? ($request->input('occupied_at') ?? now())
                 : null;
             $table->save(); // Simpan perubahan occupied_at
-
-            \Log::debug('Memperbarui meja', [
-                'id' => $id,
-                'status' => $request->status,
-                'occupied_at' => $table->occupied_at
-            ]);
-
+            
             return response()->json([
                 'success' => true,
                 'table' => [

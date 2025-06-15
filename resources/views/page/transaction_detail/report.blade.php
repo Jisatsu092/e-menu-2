@@ -55,12 +55,12 @@
             </div>
         </div>
 
-        @if($details->isEmpty())
+        @if($transactions->isEmpty())
             <div class="no-data">
                 Tidak ada detail transaksi untuk periode ini.
             </div>
         @else
-            @foreach($details as $transactionId => $items)
+            @foreach($transactions as $transactionId => $items)
             @php
                 $transaction = $items->first()->transaction;
                 $total = $items->sum('subtotal');
@@ -97,7 +97,7 @@
             <div class="total-box">
                 <div class="total-label">TOTAL PENDAPATAN</div>
                 <div class="total-amount">
-                    Rp{{ number_format($details->sum(fn($items) => $items->sum('subtotal')), 0, ',', '.') }}
+                    Rp{{ number_format($transactions->sum(fn($items) => $items->sum('subtotal')), 0, ',', '.') }}
                 </div>
             </div>
 
