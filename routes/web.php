@@ -11,6 +11,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransactionDetailController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\userInterfaceController;
+use App\Http\Middleware\RoleMiddelware;
 use App\Models\PaymentProvider;
 use App\Models\Table;
 use App\Models\Transaction;
@@ -61,14 +62,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Rute Resource
-    Route::resource('category', CategoryController::class);
-    Route::resource('table', TableController::class);
-    Route::resource('toping', TopingController::class);
-    Route::resource('transaction', TransactionController::class);
+    Route::resource('category', CategoryController::class)->middleware(['auth', RoleMiddelware::class]);
+    Route::resource('table', TableController::class)->middleware(['auth', RoleMiddelware::class]);
+    Route::resource('toping', TopingController::class)->middleware(['auth', RoleMiddelware::class]);
+    Route::resource('transaction', TransactionController::class)->middleware(['auth', RoleMiddelware::class]);
     Route::resource('transaction_details', TransactionDetailController::class);
-    Route::resource('payment_providers', PaymentProviderController::class);
+    Route::resource('payment_providers', PaymentProviderController::class)->middleware(['auth', RoleMiddelware::class]);
     Route::resource('userInterface', userInterfaceController::class);
-    Route::resource('error', ErrorController::class);
+    Route::resource('error', ErrorController::class)->middleware(['auth', RoleMiddelware::class]);
 
     // Rute Khusus Kategori
     Route::get('/category/check-name/{name}', [CategoryController::class, 'checkName'])->name('category.checkName');
