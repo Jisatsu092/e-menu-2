@@ -28,17 +28,13 @@
 
             .hide-scrollbar {
                 scrollbar-width: none;
-                /* Firefox */
                 -ms-overflow-style: none;
-                /* IE dan Edge */
             }
 
             .hide-scrollbar::-webkit-scrollbar {
                 display: none;
-                /* Chrome, Safari, dan browser berbasis WebKit */
             }
 
-            /* Style tambahan untuk modal dan elemen lain */
             #orderConfirmationModal {
                 z-index: 1002;
             }
@@ -268,6 +264,7 @@
     </head>
 
     <body class="bg-gray-100">
+        <!-- Checkout Modal -->
         <div id="checkoutModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
             <div class="bg-white rounded-lg p-6 w-full max-w-md animate-bounce-in mx-4">
                 <div class="flex justify-between items-center mb-4 border-b pb-2 relative">
@@ -321,18 +318,16 @@
                         </div>
                         <div class="flex justify-end space-x-3 mt-4">
                             <button type="button" onclick="closeCheckoutModal()"
-                                class="px-4 py-2 border rounded-md hover:bg-gray-50">
-                                Batal
-                            </button>
-                            <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">
-                                Bayar Sekarang
-                            </button>
+                                class="px-4 py-2 border rounded-md hover:bg-gray-50">Batal</button>
+                            <button type="submit"
+                                class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">Bayar
+                                Sekarang</button>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-        <!-- Modal Konfirmasi Pembayaran -->
+        <!-- Payment Confirmation Modal -->
         <div id="paymentConfirmationModal"
             class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
             <div class="bg-white rounded-lg p-6 w-full max-w-md animate-bounce-in mx-4">
@@ -405,9 +400,7 @@
                                     <div
                                         class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button onclick="removeImagePreview()"
-                                            class="bg-red-500 text-white rounded-full p-1 hover:bg-red-600">
-                                            ✕
-                                        </button>
+                                            class="bg-red-500 text-white rounded-full p-1 hover:bg-red-600">✕</button>
                                     </div>
                                 </div>
                                 <p class="text-xs text-gray-500 mt-1">Klik gambar untuk memperbesar</p>
@@ -415,24 +408,21 @@
                         </div>
                     </div>
                     <button onclick="submitPayment()"
-                        class="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition-colors">
-                        Konfirmasi Pembayaran
-                    </button>
+                        class="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition-colors">Konfirmasi
+                        Pembayaran</button>
                 </div>
             </div>
         </div>
-        <!-- Modal Gambar (Payment Confirmation) -->
+        <!-- Image Modal -->
         <div id="imageModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-90 flex items-center justify-center"
             onclick="closeImageModalIfBackground(event)">
             <div class="max-w-4xl max-h-[90vh]">
                 <img id="modalImage" class="max-h-[80vh] rounded-lg">
                 <button onclick="closeImageModal()"
-                    class="absolute top-4 right-4 text-white text-3xl hover:text-gray-200">
-                    ×
-                </button>
+                    class="absolute top-4 right-4 text-white text-3xl hover:text-gray-200">×</button>
             </div>
         </div>
-        <!-- Modal Pesanan Berhasil -->
+        <!-- Order Confirmation Modal -->
         <div id="orderConfirmationModal"
             class="fixed inset-0 z-[1002] hidden flex items-center justify-center bg-black bg-opacity-50">
             <div class="bg-white rounded-lg p-6 w-full max-w-md animate-bounce-in mx-4">
@@ -447,9 +437,7 @@
                         <p>Status: <span class="font-bold status-text"></span></p>
                     </div>
                     <button id="printButton" style="display: none;" onclick="printOrder()"
-                        class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">
-                        Cetak Pesanan
-                    </button>
+                        class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">Cetak Pesanan</button>
                 </div>
             </div>
         </div>
@@ -469,7 +457,6 @@
                     <div class="flex justify-between items-center mb-4 pb-2 border-b">
                         <h3 class="text-lg font-bold">Keranjang Belanja</h3>
                         <div class="flex items-center space-x-4">
-                            <!-- Tombol Tambah Menu -->
                             <button onclick="addNewPerson()" aria-label="Tambah Menu" class="p-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -478,7 +465,6 @@
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                 </svg>
                             </button>
-                            <!-- Tombol Hapus Semua -->
                             <button onclick="clearCart()" aria-label="Hapus Semua" class="p-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -510,23 +496,19 @@
                             <span id="mobileCartTotal" class="font-bold text-red-500">Rp0</span>
                         </div>
                         <button onclick="openCheckoutModal()"
-                            class="w-full bg-red-500 text-white py-3 rounded-xl hover:bg-red-600 transition-colors font-medium">
-                            Checkout Sekarang
-                        </button>
+                            class="w-full bg-red-500 text-white py-3 rounded-xl hover:bg-red-600 transition-colors font-medium">Checkout
+                            Sekarang</button>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Konten Utama -->
+        <!-- Main Content -->
         <div class="container mx-auto p-4">
-            <!-- Header Section -->
             <div class="flex justify-between items-center mb-4 md:mb-8">
                 <div class="text-left">
                     <h1 class="text-2xl md:text-3xl font-bold text-red-500 mb-1">🍲 Warung Seblak Ajnira</h1>
                     <p class="text-sm md:text-base text-gray-600">Pilih topping seblak favoritmu</p>
                 </div>
-                <!-- Desktop Cart -->
                 <div class="hidden md:block relative">
                     <button onclick="toggleCart()"
                         class="bg-red-500 text-white p-2 md:p-3 rounded-full shadow-lg relative hover:bg-red-600">
@@ -540,7 +522,6 @@
                             <div class="flex justify-between items-center mb-4">
                                 <h3 class="text-lg font-bold">Keranjang</h3>
                                 <div class="flex items-center space-x-4">
-                                    <!-- Tombol Tambah Menu -->
                                     <button onclick="addNewPerson()" aria-label="Tambah Menu" class="p-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                             viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -552,7 +533,6 @@
                                             </line>
                                         </svg>
                                     </button>
-                                    <!-- Tombol Hapus Semua -->
                                     <button onclick="clearCart()" aria-label="Hapus Semua" class="p-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                             viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -581,9 +561,7 @@
                                     <span id="cartTotal" class="font-bold text-red-500">Rp0</span>
                                 </div>
                                 <button onclick="openCheckoutModal()"
-                                    class="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600">
-                                    Checkout
-                                </button>
+                                    class="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600">Checkout</button>
                             </div>
                         </div>
                     </div>
@@ -594,14 +572,11 @@
                 <div class="flex-1 overflow-x-auto scroll-hide horizontal-scroll">
                     <div class="flex space-x-3 pb-3">
                         <button onclick="filterByCategory('all')"
-                            class="category-btn active px-4 py-2 bg-red-500 text-white rounded-full whitespace-nowrap">
-                            Semua Topping
-                        </button>
+                            class="category-btn active px-4 py-2 bg-red-500 text-white rounded-full whitespace-nowrap">Semua
+                            Topping</button>
                         @foreach ($categories as $category)
                             <button onclick="filterByCategory('{{ $category->id }}')"
-                                class="category-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-full whitespace-nowrap">
-                                {{ $category->name }}
-                            </button>
+                                class="category-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-full whitespace-nowrap">{{ $category->name }}</button>
                         @endforeach
                     </div>
                 </div>
@@ -609,26 +584,20 @@
             <!-- Desktop Categories -->
             <div class="hidden md:flex mb-6 space-x-3">
                 <button onclick="filterByCategory('all')"
-                    class="category-btn active px-4 py-2 bg-red-500 text-white rounded-md">
-                    Semua Topping
-                </button>
+                    class="category-btn active px-4 py-2 bg-red-500 text-white rounded-md">Semua Topping</button>
                 @foreach ($categories as $category)
                     <button onclick="filterByCategory('{{ $category->id }}')"
-                        class="category-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-md">
-                        {{ $category->name }}
-                    </button>
+                        class="category-btn px-4 py-2 bg-gray-100 text-gray-600 rounded-md">{{ $category->name }}</button>
                 @endforeach
             </div>
             <!-- Mobile Cart Scroll -->
             <div class="md:hidden mb-6">
-                <div id="mobileCart" class="flex overflow-x-auto scroll-hide gap-3 pb-3 horizontal-scroll">
-                    <!-- Item cart akan ditambahkan via JavaScript -->
-                </div>
+                <div id="mobileCart" class="flex overflow-x-auto scroll-hide gap-3 pb-3 horizontal-scroll"></div>
             </div>
             <!-- Topping Grid -->
             <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="non-minuman-toppings">
                 @php
-                    $minumanCategory = $categories->where('name', 'minuman')->first();
+                    $minumanCategory = $categories->where('name', 'Minuman')->first();
                     $minumanCategoryId = $minumanCategory ? $minumanCategory->id : null;
                 @endphp
                 @foreach ($topings->where('category_id', '!=', $minumanCategoryId) as $toping)
@@ -646,13 +615,11 @@
                     <div class="text-gray-800 px-1">
                         <h3 class="text-sm md:text-base font-bold mb-1 truncate">{{ $toping->name }}</h3>
                         <div class="flex justify-between items-center">
-                            <p class="text-base md:text-lg font-bold text-red-500">
-                                Rp{{ number_format($toping->price, 0, ',', '.') }}
-                            </p>
+                            <p class="text-base md:text-lg font-bold text-red-500">Rp{{ number_format($toping->price_buy, 0, ',', '.') }}</p>
                             <div class="flex items-center space-x-2">
-                                <button onclick="updateQuantity('{{ $toping->id }}', -1, {{ $toping->price }})" class="bg-gray-200 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-300 text-xs md:text-sm">-</button>
+                                <button onclick="updateQuantity('{{ $toping->id }}', -1, {{ $toping->price_buy }})" class="bg-gray-200 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-300 text-xs md:text-sm">-</button>
                                 <span id="qty-{{ $toping->id }}" class="px-1 text-sm">0</span>
-                                <button onclick="updateQuantity('{{ $toping->id }}', 1, {{ $toping->price }})" class="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 text-xs md:text-sm">+</button>
+                                <button onclick="updateQuantity('{{ $toping->id }}', 1, {{ $toping->price_buy }})" class="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 text-xs md:text-sm">+</button>
                             </div>
                         </div>
                     </div>
@@ -682,14 +649,13 @@
                 <div class="text-gray-800 px-1">
                 <h3 class="text-sm md:text-base font-bold mb-1 truncate">{{ $toping->name }}</h3>
                 <div class="flex justify-between items-center">
-                <p class="text-base md:text-lg font-bold text-red-500">
-                Rp{{ number_format($toping->price, 0, ',', '.') }}
-                </p>
+                <p
+                class="text-base md:text-lg font-bold text-red-500">Rp{{ number_format($toping->price_buy, 0, ',', '.') }}</p>
                 <div class="flex items-center space-x-2">
-                <button onclick="updateQuantity('{{ $toping->id }}', -1, {{ $toping->price }})"
+                <button onclick="updateQuantity('{{ $toping->id }}', -1, {{ $toping->price_buy }})"
                 class="bg-gray-200 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-300 text-xs md:text-sm">-</button>
                 <span id="qty-{{ $toping->id }}" class="px-1 text-sm">0</span>
-                <button onclick="updateQuantity('{{ $toping->id }}', 1, {{ $toping->price }})"
+                <button onclick="updateQuantity('{{ $toping->id }}', 1, {{ $toping->price_buy }})"
                 class="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 text-xs md:text-sm">+</button>
                 </div>
                 </div>
@@ -699,22 +665,17 @@
                 </div>
                 </div>
                 </div>
-
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
                         checkPendingOrder();
-
                         document.addEventListener('click', function(event) {
                             const cartButton = document.getElementById('mobileCartButton');
                             const cartDropdown = document.getElementById('mobileCartDropdown');
-
                             if (!cartButton.contains(event.target) && !cartDropdown.contains(event.target)) {
                                 cartDropdown.classList.add('hidden');
                             }
-
                             const mobilePanel = document.getElementById('mobileCartPanel');
                             const mobileButton = document.getElementById('mobileCartButton');
-
                             if (mobilePanel && mobileButton) {
                                 if (!mobilePanel.contains(event.target) && !mobileButton.contains(event.target)) {
                                     mobilePanel.classList.add('hidden');
@@ -722,7 +683,6 @@
                                 }
                             }
                         });
-
                         window.toggleCart = function() {
                             const dropdown = document.getElementById('cartDropdown');
                             if (window.innerWidth >= 768) {
@@ -747,32 +707,39 @@
                     const paymentProviders = @json($paymentProviders->where('is_active', true));
 
                     function updateCartDisplay() {
-                        const totalQty = cart.reduce((acc, person) => acc + person.items.reduce((sum, item) => sum + item.quantity, 0),
-                            0);
-                        const totalPrice = cart.reduce((acc, person) => acc + person.items.reduce((sum, item) => sum + (item.price *
-                            item.quantity), 0), 0);
-
-                        document.getElementById('cartBadge').textContent = totalQty;
-                        document.getElementById('cartTotal').textContent = `Rp${totalPrice.toLocaleString('id-ID')}`;
-                        document.getElementById('cartItemTotal').textContent = `${totalQty} item`;
-                        document.getElementById('mobileCartBadge').textContent = totalQty;
-                        document.getElementById('mobileCartTotal').textContent = `Rp${totalPrice.toLocaleString('id-ID')}`;
-                        document.getElementById('mobileCartItemTotal').textContent = `${totalQty} item`;
-
                         const mobileItems = document.getElementById('mobileCartItems');
                         const desktopItems = document.getElementById('cartItems');
 
+                        // Calculate totals per person and overall
+                        const personTotals = cart.map(person => {
+                            const totalQty = person.items.reduce((sum, item) => sum + item.quantity, 0);
+                            const totalPrice = person.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                            return {
+                                person: person.person,
+                                totalQty,
+                                totalPrice
+                            };
+                        });
+
+                        const overallTotalQty = personTotals.reduce((acc, person) => acc + person.totalQty, 0);
+                        const overallTotalPrice = personTotals.reduce((acc, person) => acc + person.totalPrice, 0);
+
+                        // Update badges and totals
+                        document.getElementById('cartBadge').textContent = overallTotalQty;
+                        document.getElementById('mobileCartBadge').textContent = overallTotalQty;
+                        document.getElementById('cartItemTotal').textContent = `${overallTotalQty} item`;
+                        document.getElementById('mobileCartItemTotal').textContent = `${overallTotalQty} item`;
+                        document.getElementById('cartTotal').textContent = `Rp${overallTotalPrice.toLocaleString('id-ID')}`;
+                        document.getElementById('mobileCartTotal').textContent = `Rp${overallTotalPrice.toLocaleString('id-ID')}`;
+
+                        // Generate person buttons
                         const personButtons = cart.map((person, index) => `
-                <button onclick="selectPerson(${index})" 
-                    class="px-4 py-2 ${currentPersonIndex === index ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600'} rounded-md mr-2">
-                    ${person.person}
-                </button>
+                <button onclick="selectPerson(${index})" class="px-4 py-2 ${currentPersonIndex === index ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-600'} rounded-md mr-2">${person.person}</button>
             `).join('');
 
+                        // Generate cart HTML with per-person totals
                         const cartHTML = `
-                <div class="flex space-x-3 mb-4">
-                    ${personButtons}
-                </div>
+                <div class="flex space-x-3 mb-4">${personButtons}</div>
                 <div class="space-y-3">
                     <div class="flex space-x-2">
                         <select onchange="updateSpicinessLevel(this.value)" class="rounded-md border p-1 text-sm">
@@ -794,22 +761,23 @@
                                                             <div class="flex-1">
                                                                 <p class="font-medium text-sm">${item.name}</p>
                                                                 <div class="flex items-center space-x-2 mt-1">
-                                                                    <button onclick="updateQuantity('${item.id}', -1, ${item.price})" 
-                                                                        class="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg text-xs">−</button>
+                                                                    <button onclick="updateQuantity('${item.id}', -1, ${item.price})" class="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg text-xs">−</button>
                                                                     <span class="text-sm font-medium">${item.quantity}</span>
-                                                                    <button onclick="updateQuantity('${item.id}', 1, ${item.price})" 
-                                                                        class="bg-red-500 text-white px-2 py-1 rounded-lg text-xs">+</button>
+                                                                    <button onclick="updateQuantity('${item.id}', 1, ${item.price})" class="bg-red-500 text-white px-2 py-1 rounded-lg text-xs">+</button>
                                                                 </div>
                                                             </div>
                                                             <div class="text-right">
-                                                                <p class="text-sm font-medium text-red-500">
-                                                                    Rp${(item.price * item.quantity).toLocaleString('id-ID')}
-                                                                </p>
-                                                                <button onclick="removeItem('${item.id}')" 
-                                                                    class="text-gray-400 hover:text-red-500 text-xs mt-1">Hapus</button>
+                                                                <p class="text-sm font-medium text-red-500">Rp${(item.price * item.quantity).toLocaleString('id-ID')}</p>
+                                                                <button onclick="removeItem('${item.id}')" class="text-gray-400 hover:text-red-500 text-xs mt-1">Hapus</button>
                                                             </div>
                                                         </div>
                                                     `).join('') : '<p class="text-sm text-gray-500">Belum ada item</p>'}
+                    <div class="border-t pt-2 mt-2">
+                        <p class="flex justify-between font-bold">
+                            <span>Total ${cart[currentPersonIndex].person}:</span>
+                            <span class="text-red-500">Rp${personTotals[currentPersonIndex].totalPrice.toLocaleString('id-ID')}</span>
+                        </p>
+                    </div>
                 </div>
             `;
 
@@ -835,9 +803,8 @@
                     function resetMenuSelections() {
                         document.querySelectorAll('[id^="qty-"]').forEach(el => {
                             const id = el.id.replace('qty-', '');
-                            const qtyForCurrentPerson = cart[currentPersonIndex].items
-                                .filter(item => item.id === id)
-                                .reduce((sum, item) => sum + item.quantity, 0);
+                            const qtyForCurrentPerson = cart[currentPersonIndex].items.filter(item => item.id === id).reduce((
+                                sum, item) => sum + item.quantity, 0);
                             el.textContent = qtyForCurrentPerson;
                         });
                     }
@@ -857,13 +824,11 @@
                     document.addEventListener('click', function(event) {
                         const cartDropdown = document.getElementById('cartDropdown');
                         const cartButton = document.querySelector('.hidden.md\\:block .relative button');
-
                         if (cartDropdown && cartButton) {
                             if (!cartDropdown.contains(event.target) && !cartButton.contains(event.target)) {
                                 cartDropdown.classList.add('hidden');
                             }
                         }
-
                         const checkoutButton = document.querySelector('[onclick="openCheckoutModal()"]');
                         if (checkoutButton && event.target.closest('[onclick="openCheckoutModal()"]')) {
                             if (cartDropdown) cartDropdown.classList.add('hidden');
@@ -872,30 +837,23 @@
                     });
 
                     window.filterByCategory = function(categoryId) {
-                        const minumanCategory = @json($categories->where('name', 'minuman')->first());
+                        const minumanCategory = @json($categories->where('name', 'Minuman')->first());
                         const minumanId = minumanCategory ? minumanCategory.id : null;
-
-                        // Update active class pada tombol kategori
                         document.querySelectorAll('.category-btn').forEach(btn => {
                             btn.classList.remove('active', 'bg-red-500', 'text-white');
                             btn.classList.add('bg-gray-100', 'text-gray-600');
                         });
-
-                        const activeBtn = [...document.querySelectorAll('.category-btn')]
-                            .find(btn => btn.textContent.trim() ===
-                                (categoryId === 'all' ? 'Semua Topping' :
-                                    document.querySelector(`[onclick="filterByCategory('${categoryId}')"]`)?.textContent?.trim()));
-
+                        const activeBtn = [...document.querySelectorAll('.category-btn')].find(btn => btn.textContent.trim() === (
+                            categoryId === 'all' ? 'Semua Topping' : document.querySelector(
+                                `[onclick="filterByCategory('${categoryId}')"]`)?.textContent?.trim()));
                         if (activeBtn) {
                             activeBtn.classList.remove('bg-gray-100', 'text-gray-600');
                             activeBtn.classList.add('active', 'bg-red-500', 'text-white');
                         }
-
                         const nonMinumanSection = document.getElementById('non-minuman-toppings');
                         const minumanSection = document.getElementById('minuman-toppings');
                         const nonMinumanItems = document.querySelectorAll('#non-minuman-toppings [data-category-id]');
                         const minumanItems = document.querySelectorAll('#minuman-toppings [data-category-id]');
-
                         if (categoryId === 'all') {
                             nonMinumanSection.classList.remove('hidden');
                             minumanSection.classList.remove('hidden');
@@ -925,7 +883,6 @@
                             Swal.fire('Error!', 'Harga item tidak valid', 'error');
                             return;
                         }
-
                         const person = cart[currentPersonIndex];
                         const itemIndex = person.items.findIndex(item => item.id === id);
                         const stockElement = document.getElementById(`stock-${id}`);
@@ -935,7 +892,6 @@
                             return;
                         }
                         let currentStock = parseInt(stockElement.textContent);
-
                         if (itemIndex > -1) {
                             const newQty = person.items[itemIndex].quantity + change;
                             if (newQty < 0) return;
@@ -977,14 +933,11 @@
                         const person = cart[currentPersonIndex];
                         const itemIndex = person.items.findIndex(item => item.id === id);
                         if (itemIndex === -1) return;
-
                         const removedItem = person.items[itemIndex];
                         const stockElement = document.getElementById(`stock-${id}`);
-
                         if (stockElement) {
                             stockElement.textContent = parseInt(stockElement.textContent) + removedItem.quantity;
                         }
-
                         person.items.splice(itemIndex, 1);
                         updateCartDisplay();
                     }
@@ -1019,7 +972,6 @@
                         const dropdown = document.getElementById('mobileCartDropdown');
                         dropdown.classList.toggle('hidden');
                         dropdown.classList.toggle('animate-bounce-in');
-
                         if (!dropdown.classList.contains('hidden')) {
                             document.activeElement.blur();
                             window.scrollTo({
@@ -1041,35 +993,29 @@
                             return;
                         }
                         showModal('checkoutModal');
-
-                        const orderItemsHTML = cart.flatMap(person =>
-                            person.items.map(item => `
-                    <div class="flex justify-between">
-                        <span>${item.name} (${person.person}, Qty: ${item.quantity})</span>
-                        <span>Rp${(item.price * item.quantity).toLocaleString('id-ID')}</span>
-                    </div>
-                `)
-                        ).join('');
-
+                        const orderItemsHTML = cart.map(person => `
+                <div class="border-b pb-2 mb-2">
+                    <p class="font-bold">${person.person}</p>
+                    ${person.items.map(item => `
+                                                        <div class="flex justify-between">
+                                                            <span>${item.name} (Qty: ${item.quantity})</span>
+                                                            <span>Rp${(item.price * item.quantity).toLocaleString('id-ID')}</span>
+                                                        </div>
+                                                    `).join('')}
+                    <p class="flex justify-between font-bold mt-2">
+                        <span>Total ${person.person}:</span>
+                        <span>Rp${person.items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toLocaleString('id-ID')}</span>
+                    </p>
+                </div>
+            `).join('');
                         document.getElementById('orderItems').innerHTML = orderItemsHTML;
-
-                        const total = cart.reduce((acc, person) =>
-                            acc + person.items.reduce((sum, item) => {
-                                const price = parseFloat(item.price);
-                                if (isNaN(price)) {
-                                    console.error(`Harga tidak valid untuk item ${item.id}: ${item.price}`);
-                                    return sum;
-                                }
-                                return sum + (price * item.quantity);
-                            }, 0),
-                            0);
-
+                        const total = cart.reduce((acc, person) => acc + person.items.reduce((sum, item) => sum + (parseFloat(item
+                            .price) * item.quantity), 0), 0);
                         document.getElementById('modalTotal').textContent = `Rp${total.toLocaleString('id-ID')}`;
                         document.getElementById('cartDropdown').classList.add('hidden');
                         document.getElementById('mobileCartPanel')?.classList.add('hidden');
                         document.getElementById('checkoutModal').classList.remove('hidden');
                         document.getElementById('mobileCartDropdown').classList.add('hidden');
-
                         refreshTableStatus();
                         refreshInterval = setInterval(() => {
                             if (!document.getElementById('checkoutModal').classList.contains('hidden')) {
@@ -1118,7 +1064,6 @@
                         const providerId = document.getElementById('paymentMethod').value;
                         const provider = paymentProviders.find(p => p.id == providerId);
                         const paymentDetails = document.getElementById('paymentDetails');
-
                         if (provider) {
                             paymentDetails.classList.remove('hidden');
                             document.getElementById('providerLogo').src = provider.logo;
@@ -1150,46 +1095,35 @@
                         e.preventDefault();
                         const tableNumber = document.getElementById('tableNumber').value;
                         const isTakeAway = document.getElementById('takeAwayToggle').checked;
-
                         if (!tableNumber && !isTakeAway) {
                             Swal.fire('Error!', 'Harap pilih meja atau Take Away', 'error');
                             return;
                         }
-
-                        const firstPerson = cart[0];
-                        const spicinessLevel = firstPerson.spiciness_level;
-                        const bowlSize = firstPerson.bowl_size;
-
-                        if (!spicinessLevel || !bowlSize) {
-                            Swal.fire('Error!', 'Harap pilih tingkat kepedasan dan ukuran mangkuk untuk orang pertama', 'error');
-                            return;
-                        }
-
-                        const totalPrice = cart.reduce((acc, person) =>
-                            acc + person.items.reduce((sum, item) => sum + (item.price * item.quantity), 0), 0);
-
+                        const totalPrice = cart.reduce((acc, person) => acc + person.items.reduce((sum, item) => sum + (item.price *
+                            item.quantity), 0), 0);
                         const orderData = {
                             table_id: isTakeAway ? 'takeaway' : tableNumber,
-                            spiciness_level: spicinessLevel,
-                            bowl_size: bowlSize,
                             items: cart,
                             total_price: totalPrice
                         };
-
                         sessionStorage.setItem('pendingOrder', JSON.stringify(orderData));
-
                         const paymentOrderItems = document.getElementById('paymentOrderItems');
-                        paymentOrderItems.innerHTML = cart.flatMap(person =>
-                            person.items.map(item => `
-                    <div class="flex justify-between">
-                        <span>${item.name} (${person.person}, Qty: ${item.quantity})</span>
-                        <span>Rp${(item.price * item.quantity).toLocaleString('id-ID')}</span>
-                    </div>
-                `)
-                        ).join('');
-
+                        paymentOrderItems.innerHTML = cart.map(person => `
+                <div class="border-b pb-2 mb-2">
+                    <p class="font-bold">${person.person}</p>
+                    ${person.items.map(item => `
+                                                        <div class="flex justify-between">
+                                                            <span>${item.name} (Qty: ${item.quantity})</span>
+                                                            <span>Rp${(item.price * item.quantity).toLocaleString('id-ID')}</span>
+                                                        </div>
+                                                    `).join('')}
+                    <p class="flex justify-between font-bold mt-2">
+                        <span>Total ${person.person}:</span>
+                        <span>Rp${person.items.reduce((sum, item) => sum + (item.price * item.quantity), 0).toLocaleString('id-ID')}</span>
+                    </p>
+                </div>
+            `).join('');
                         document.getElementById('paymentTotal').textContent = `Rp${totalPrice.toLocaleString('id-ID')}`;
-
                         closeCheckoutModal();
                         document.getElementById('paymentConfirmationModal').classList.remove('hidden');
                     }
@@ -1219,12 +1153,10 @@
                             Swal.fire('Error!', 'Harap pilih metode pembayaran', 'error');
                             return;
                         }
-
                         if (!paymentProof) {
                             Swal.fire('Error!', 'Harap upload bukti pembayaran', 'error');
                             return;
                         }
-
                         if (!paymentProof.type.startsWith('image/')) {
                             Swal.fire('Error!', 'File harus berupa gambar', 'error');
                             return;
@@ -1235,16 +1167,8 @@
                         formData.append('provider_id', providerId);
                         formData.append('order_data', JSON.stringify({
                             table_id: orderData.table_id,
-                            spiciness_level: orderData.spiciness_level,
-                            bowl_size: orderData.bowl_size,
                             total_price: orderData.total_price,
-                            items: orderData.items.flatMap(person =>
-                                person.items.map(item => ({
-                                    id: item.id,
-                                    quantity: item.quantity,
-                                    price: parseFloat(item.price)
-                                }))
-                            )
+                            items: orderData.items
                         }));
 
                         try {
@@ -1255,21 +1179,24 @@
                                 },
                                 body: formData
                             });
-
                             const result = await response.json();
-
                             if (result.success) {
+                                // Simpan data transaksi di session storage sebelum refresh
                                 const transactionData = {
                                     showModal: true,
                                     transactionId: result.transactionId,
                                     status: result.status,
                                     timestamp: Date.now()
                                 };
-
                                 sessionStorage.setItem('pendingOrderStatus', JSON.stringify(transactionData));
-                                showOrderModal(result.status, result.transactionId);
-                                closePaymentModal();
-                                clearCart();
+
+                                // Hapus data pesanan lama
+                                sessionStorage.removeItem('pendingOrder');
+
+                                // Refresh halaman
+                                location.reload();
+
+                                // Catatan: Modal akan ditampilkan oleh fungsi checkPendingOrder setelah refresh
                             } else {
                                 throw new Error(result.message);
                             }
@@ -1283,12 +1210,10 @@
                         const select = document.getElementById('tableNumber');
                         const selectedOption = select.querySelector(`option[value="${tableId}"]`);
                         const statusMessage = document.getElementById('tableStatusMessage');
-
                         if (tableId === 'takeaway') {
                             statusMessage.innerHTML = '<span class="text-blue-500">ℹ️ Tidak memerlukan meja untuk Take Away</span>';
                             return;
                         }
-
                         if (selectedOption) {
                             if (selectedOption.disabled) {
                                 statusMessage.innerHTML = '<span class="text-red-500">⛔ Meja sedang digunakan!</span>';
@@ -1307,25 +1232,18 @@
                         try {
                             const response = await fetch('/tables');
                             const tables = await response.json();
-
                             const select = document.getElementById('tableNumber');
                             const currentValue = select.value;
-
-                            select.innerHTML = `
-                    <option value="">Pilih Meja</option>
-                `;
+                            select.innerHTML = `<option value="">Pilih Meja</option>`;
                             tables.forEach(table => {
                                 const option = new Option(
                                     `Meja ${table.number} - ${table.status === 'occupied' ? '(Terisi)' : '(Tersedia)'}`,
-                                    table.id
-                                );
+                                    table.id);
                                 option.dataset.status = table.status;
                                 option.disabled = table.status.toLowerCase() === 'occupied';
                                 select.appendChild(option);
                             });
-
                             select.value = currentValue;
-
                             if (currentValue) checkTableStatus(currentValue);
                         } catch (error) {
                             console.error('Gagal memperbarui status meja:', error);
@@ -1337,25 +1255,19 @@
                         try {
                             const modal = document.getElementById('orderConfirmationModal');
                             if (!modal) return;
-
                             modal.classList.remove('hidden');
                             modal.classList.add('show');
-
                             const statusElement = modal.querySelector('.status-text');
                             const printBtn = modal.querySelector('#printButton');
-
                             if (!statusElement || !printBtn) {
                                 throw new Error('Modal elements not found');
                             }
-
                             statusElement.textContent = status;
                             statusElement.className = `font-bold ${status === 'proses' ? 'text-green-500' : 'text-yellow-500'}`;
                             printBtn.style.display = status === 'proses' ? 'block' : 'none';
                             printBtn.dataset.transactionId = transactionId;
-
                             modal.classList.remove('hidden');
                             modal.style.display = 'flex';
-
                             window.scrollTo({
                                 top: 0,
                                 behavior: 'smooth'
@@ -1369,7 +1281,6 @@
                         try {
                             const transactionId = document.getElementById('printButton').dataset.transactionId;
                             if (!transactionId) throw new Error('ID Transaksi tidak valid');
-
                             fetch(`/transaksi/print/${transactionId}`)
                                 .then(response => {
                                     if (!response.ok) throw new Error('Gagal memuat data cetakan');
@@ -1377,14 +1288,11 @@
                                 })
                                 .then(html => {
                                     const printWindow = window.open('', '_blank');
-
                                     if (!printWindow || printWindow.closed) {
                                         throw new Error('Pop-up diblokir. Izinkan pop-up untuk mencetak');
                                     }
-
                                     printWindow.document.write(html);
                                     printWindow.document.close();
-
                                     setTimeout(() => {
                                         printWindow.print();
                                         printWindow.onafterprint = () => {
@@ -1409,16 +1317,13 @@
                     function showPersistedOrderModal(status, transactionId) {
                         const modal = document.getElementById('orderConfirmationModal');
                         if (!modal) return;
-
                         const statusElement = modal.querySelector('.status-text');
                         const printBtn = document.getElementById('printButton');
-
                         if (statusElement && printBtn) {
                             statusElement.textContent = status;
                             statusElement.className = `font-bold ${status === 'proses' ? 'text-green-500' : 'text-yellow-500'}`;
                             printBtn.style.display = status === 'proses' ? 'block' : 'none';
                             printBtn.dataset.transactionId = transactionId;
-
                             modal.classList.remove('hidden');
                         }
                     }
@@ -1432,28 +1337,22 @@
                         try {
                             const pendingOrderStr = sessionStorage.getItem('pendingOrderStatus');
                             if (!pendingOrderStr) return;
-
                             const pendingOrder = JSON.parse(pendingOrderStr);
                             if (!pendingOrder || !pendingOrder.showModal) return;
-
                             const oneHourAgo = Date.now() - 3600000;
                             if (pendingOrder.timestamp > oneHourAgo) {
                                 try {
                                     const response = await fetch(`/transactions/${pendingOrder.transactionId}/status`);
                                     if (!response.ok) throw new Error('Failed to fetch status');
-
                                     const data = await response.json();
                                     const currentStatus = data.status.toLowerCase();
-
                                     const updatedOrder = {
                                         ...pendingOrder,
                                         status: currentStatus,
                                         timestamp: Date.now()
                                     };
                                     sessionStorage.setItem('pendingOrderStatus', JSON.stringify(updatedOrder));
-
                                     showPersistedOrderModal(currentStatus, pendingOrder.transactionId);
-
                                     if (!['pending', 'proses'].includes(currentStatus)) {
                                         sessionStorage.removeItem('pendingOrderStatus');
                                     }
@@ -1475,16 +1374,13 @@
                         const container = document.getElementById('imagePreviewContainer');
                         const preview = document.getElementById('imagePreview');
                         const uploadLabel = document.getElementById('uploadLabel');
-
                         if (input.files && input.files[0]) {
                             const reader = new FileReader();
-
                             reader.onload = function(e) {
                                 preview.src = e.target.result;
                                 container.classList.remove('hidden');
                                 uploadLabel.style.display = 'none';
                             }
-
                             reader.readAsDataURL(input.files[0]);
                         }
                     }
@@ -1530,6 +1426,5 @@
                     }
                 </script>
                 </body>
-
                 </html>
                 </x-app-layout>)

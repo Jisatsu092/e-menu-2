@@ -11,7 +11,8 @@ use App\Models\TransactionDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 
 class userInterfaceController extends Controller
 {
@@ -42,6 +43,13 @@ class userInterfaceController extends Controller
             ]);
 
             $table = Table::findOrFail($request->table_id);
+            if ($table->status === 'occupied') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Meja sudah terisi'
+                ], 422);
+            }
+
             $table->update([
                 'status' => 'occupied',
                 'occupied_at' => now()
@@ -65,92 +73,125 @@ class userInterfaceController extends Controller
     public function confirmPayment(Request $request)
     {
         try {
+            // Validate request
             $request->validate([
                 'payment_proof' => 'required|image|mimes:jpeg,png,jpg|max:2048',
                 'provider_id' => 'required|exists:payment_providers,id',
                 'order_data' => 'required|json',
             ]);
 
+            // Parse and validate order data
+            $orderData = json_decode($request->input('order_data'), true);
+            if (!is_array($orderData) || !isset($orderData['table_id'], $orderData['items'], $orderData['total_price'])) {
+                throw new \Exception('Struktur data pesanan tidak valid');
+            }
+
+            if (!is_array($orderData['items']) || empty($orderData['items'])) {
+                throw new \Exception('Pesanan harus memiliki setidaknya satu item');
+            }
+
             DB::beginTransaction();
 
-            // Parse order data
-            $orderData = json_decode($request->input('order_data'), true);
-
-            // Validate order data
-            if (!isset($orderData['table_id'], $orderData['spiciness_level'], $orderData['bowl_size'], $orderData['items'])) {
-                throw new \Exception('Invalid order data');
-            }
-
-            // Validasi bahwa ada setidaknya satu topping
-            if (empty($orderData['items'])) {
-                throw new \Exception('Pesanan harus memiliki setidaknya satu topping.');
-            }
-
-            // Hitung total_price berdasarkan price_buy
+            // Validate items and calculate total
             $totalPrice = 0;
-            foreach ($orderData['items'] as $item) {
-                $toping = Toping::findOrFail($item['id']);
-                if ($toping->stock < $item['quantity']) {
-                    throw new \Exception("Stok {$toping->name} tidak cukup.");
+            $allItems = [];
+            $firstPersonSettings = null;
+
+            foreach ($orderData['items'] as $personIndex => $person) {
+                if (!isset($person['person'], $person['items'], $person['spiciness_level'], $person['bowl_size'])) {
+                    throw new \Exception("Data untuk " . (isset($person['person']) ? $person['person'] : 'Orang ' . ($personIndex + 1)) . " tidak lengkap");
                 }
-                $totalPrice += $toping->price_buy * $item['quantity'];
+
+                if (!empty($person['items'])) {
+                    if (empty($person['spiciness_level']) || empty($person['bowl_size'])) {
+                        throw new \Exception("Harap pilih tingkat kepedasan dan ukuran mangkuk untuk " . (isset($person['person']) ? $person['person'] : 'Orang ' . ($personIndex + 1)));
+                    }
+
+                    // Store first person's settings for transaction
+                    if ($firstPersonSettings === null) {
+                        $firstPersonSettings = [
+                            'spiciness_level' => $person['spiciness_level'],
+                            'bowl_size' => $person['bowl_size']
+                        ];
+                    }
+
+                    foreach ($person['items'] as $item) {
+                        if (!isset($item['id'], $item['quantity'], $item['price'])) {
+                            throw new \Exception('Item pesanan tidak valid');
+                        }
+
+                        $toping = Toping::findOrFail($item['id']);
+                        if ($toping->stock < $item['quantity']) {
+                            throw new \Exception("Stok {$toping->name} tidak cukup. Tersisa: {$toping->stock}");
+                        }
+
+                        // Use price_buy from database for consistency
+                        $subtotal = $toping->price_buy * $item['quantity'];
+                        $totalPrice += $subtotal;
+
+                        $allItems[] = [
+                            'id' => $item['id'],
+                            'quantity' => $item['quantity'],
+                            'price' => $toping->price_buy,
+                            'subtotal' => $subtotal
+                        ];
+                    }
+                }
             }
+
+            if (empty($allItems)) {
+                throw new \Exception('Pesanan harus memiliki setidaknya satu topping');
+            }
+
+            // Verify total price
+            if (abs($totalPrice - $orderData['total_price']) > 0.01) {
+                throw new \Exception('Total harga tidak sesuai. Dihitung: Rp' . number_format($totalPrice, 0, ',', '.') . ', Diterima: Rp' . number_format($orderData['total_price'], 0, ',', '.'));
+            }
+
+            // Generate unique transaction code
+            $transactionCode = 'TRX-' . strtoupper(Str::random(8));
 
             // Create transaction
             $transaction = Transaction::create([
                 'user_id' => Auth::id(),
                 'table_id' => $orderData['table_id'] === 'takeaway' ? null : $orderData['table_id'],
-                'spiciness_level' => $orderData['spiciness_level'],
-                'bowl_size' => $orderData['bowl_size'],
+                'code' => $transactionCode,
+                'spiciness_level' => $firstPersonSettings['spiciness_level'],
+                'bowl_size' => $firstPersonSettings['bowl_size'],
                 'total_price' => $totalPrice,
                 'status' => 'pending',
                 'payment_provider_id' => $request->provider_id,
             ]);
 
-            // Update table status and occupied_at
+            // Update table status
             if ($orderData['table_id'] !== 'takeaway') {
                 $table = Table::findOrFail($orderData['table_id']);
-                $occupiedAt = isset($orderData['occupied_at']) && Carbon::parse($orderData['occupied_at'])->isValid()
-                    ? Carbon::parse($orderData['occupied_at'])
-                    : now();
+                if ($table->status === 'occupied') {
+                    throw new \Exception('Meja sudah terisi oleh pelanggan lain');
+                }
                 $table->update([
                     'status' => 'occupied',
-                    'occupied_at' => $occupiedAt
+                    'occupied_at' => now()
                 ]);
             }
 
-            // Create transaction details
-            foreach ($orderData['items'] as $item) {
-                $toping = Toping::findOrFail($item['id']);
+            // Create transaction details and update stock
+            foreach ($allItems as $item) {
                 TransactionDetail::create([
                     'transaction_id' => $transaction->id,
                     'toping_id' => $item['id'],
                     'quantity' => $item['quantity'],
-                    'subtotal' => $toping->price_buy * $item['quantity'],
+                    'subtotal' => $item['subtotal'],
                 ]);
-
-                // Update stock
-                $toping->decrement('stock', $item['quantity']);
+                Toping::findOrFail($item['id'])->decrement('stock', $item['quantity']);
             }
 
             // Handle payment proof
             if ($request->hasFile('payment_proof')) {
-                // Pastikan direktori payment_proofs ada
-                if (!file_exists(public_path('payment_proofs'))) {
-                    mkdir(public_path('payment_proofs'), 0755, true);
-                }
-
-                // Hapus payment proof lama jika ada
-                if ($transaction->payment_proof && file_exists(public_path($transaction->payment_proof))) {
-                    unlink(public_path($transaction->payment_proof));
-                }
-
-                // Simpan payment proof baru
                 $proof = $request->file('payment_proof');
                 $proofName = time() . '_' . $proof->getClientOriginalName();
                 $proofPath = 'payment_proofs/' . $proofName;
                 $proof->move(public_path('payment_proofs'), $proofName);
-
                 $transaction->update(['payment_proof' => $proofPath]);
             }
 
@@ -166,7 +207,7 @@ class userInterfaceController extends Controller
             return response()->json([
                 'success' => false,
                 'errors' => $e->errors(),
-                'message' => 'Validasi gagal'
+                'message' => 'Validasi gagal: ' . implode(', ', Arr::flatten($e->errors()))
             ], 422);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -200,7 +241,6 @@ class userInterfaceController extends Controller
         }
     }
 
-    // Endpoint untuk mendapatkan status tabel
     public function getTables()
     {
         try {
@@ -211,7 +251,6 @@ class userInterfaceController extends Controller
         }
     }
 
-    // Endpoint untuk mendapatkan status transaksi
     public function getTransactionStatus($transactionId)
     {
         try {
@@ -222,15 +261,14 @@ class userInterfaceController extends Controller
         }
     }
 
-    // Endpoint untuk print transaksi
     public function printTransaction($transactionId)
     {
         try {
             $transaction = Transaction::with('details.toping', 'table', 'paymentProvider', 'user')->findOrFail($transactionId);
             $html = view('transactions.print', compact('transaction'))->render();
-            return response($html)->header('Content-Type', 'text/html');
+            return response($html);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error generating print: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Error generating print view: ' . $e->getMessage()], 500);
         }
     }
 }

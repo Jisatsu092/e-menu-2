@@ -18,6 +18,16 @@
                         </button>
                     </div>
 
+                    <form method="GET" action="{{ route('toping.index') }}">
+                        <div class="flex items-center gap-2 mb-4">
+                            <input type="text" name="search" value="{{ request()->search }}" 
+                                   placeholder="Cari nama toping" 
+                                   class="bg-white border-2 border-red-600 text-red-600 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5">
+                            <button type="submit" 
+                                    class="text-white bg-red-600 hover:bg-red-700 rounded-lg p-2 text-sm">🔍</button>
+                        </div>
+                    </form>
+
                     @if ($errors->any())
                         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                             <ul>
@@ -270,7 +280,6 @@
     </div>
 
     <style>
-        /* Tombol Edit */
         .edit-button {
             background: transparent;
             border: 2px solid #FFC107;
@@ -289,7 +298,6 @@
             background: transparent;
             color: #D4A017;
         }
-        /* Tombol Hapus */
         .delete-button {
             background: transparent;
             border: 2px solid #DC2626;
@@ -318,7 +326,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // Fungsi Toggle Modal
         function toggleModal(modalId) {
             const modal = document.getElementById(modalId);
             modal.classList.toggle('hidden');
@@ -334,7 +341,6 @@
             }
         }
 
-        // Fungsi Preview Gambar
         function showImagePreview(event, type) {
             const input = event.target;
             const previewId = type === 'create' ? 'imagePreviewCreate' : 'imagePreviewEdit';
@@ -351,7 +357,6 @@
             }
         }
 
-        // Fungsi Hitung Harga Jual
         function calculatePriceBuy(type) {
             const priceInput = document.getElementById(`price_${type}`);
             const priceBuyInput = document.getElementById(`price_buy_${type}`);
@@ -362,7 +367,6 @@
             priceBuyInput.value = rounded;
         }
 
-        // Fungsi Edit Modal
         function editTopingModal(button) {
             const id = button.dataset.id;
             const form = document.getElementById('editForm');
@@ -385,11 +389,9 @@
             toggleModal('editTopingModal');
         }
 
-        // Konfirmasi Hapus
         document.querySelectorAll('.delete-form').forEach(form => {
             form.addEventListener('submit', function(e) {
                 e.preventDefault();
-                console.log('Delete form submitted');
                 const stock = parseInt(this.dataset.stock);
                 const name = this.closest('tr').querySelector('td:nth-child(2)').textContent;
 
@@ -416,9 +418,7 @@
             });
         });
 
-        // Notifikasi
         @if (session('success'))
-            console.log('Sesi success tersedia: {{ session('success') }}');
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
@@ -428,7 +428,6 @@
             });
         @endif
         @if (session('error_message'))
-            console.log('Sesi error_message tersedia: {{ session('error_message') }}');
             Swal.fire({
                 icon: 'error',
                 title: 'Gagal!',

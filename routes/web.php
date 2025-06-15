@@ -89,6 +89,7 @@ Route::middleware('auth')->group(function () {
 
     // Rute Khusus Toping
     Route::get('/toping/check-name/{name}', [TopingController::class, 'checkName'])->name('toping.checkName');
+    Route::get('/toping/search', [TopingController::class, 'search'])->name('toping.search');
 
     // Rute Khusus Transaksi
     Route::post('/transactions', [TransactionController::class, 'store'])->name('transactions.store');

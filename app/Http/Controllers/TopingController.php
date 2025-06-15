@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Toping;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class TopingController extends Controller
 {
@@ -63,7 +64,7 @@ class TopingController extends Controller
             ]);
 
             $data = [
-                'name' => $request->input('name'),
+                'name' => Str::title($request->input('name')), // Ubah ke title case
                 'category_id' => $request->input('category_id'),
                 'price' => $request->input('price'),
                 'price_buy' => $this->calculatePriceBuy($request->input('price')),
@@ -120,7 +121,7 @@ class TopingController extends Controller
             ]);
 
             $data = [
-                'name' => $request->input('name'),
+                'name' => Str::title($request->input('name')), // Ubah ke title case
                 'category_id' => $request->input('category_id'),
                 'price' => $request->input('price'),
                 'price_buy' => $this->calculatePriceBuy($request->input('price')),
@@ -203,4 +204,26 @@ class TopingController extends Controller
             ], 500);
         }
     }
-}
+
+    /**
+     * Handle real-time search via AJAX
+     */
+    public function search(Request $request)
+    {
+        try {
+            $search = $request->query('search');
+            $entries = $request->query('entries', 5);
+
+            $topings = Toping::with('category')
+                ->when($search, function ($query) use ($search) {
+                    $query->where('name', 'like', "%$search%");
+                })
+                ->paginate($entries)
+                ->withQueryString();
+
+            return response()->json($topings);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
+        }
+    }
+}   
